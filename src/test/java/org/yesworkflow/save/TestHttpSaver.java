@@ -45,7 +45,6 @@ public class TestHttpSaver extends YesWorkflowTestCase {
         this.modeler = new DefaultModeler(this.ywdb, super.stdoutStream, super.stderrStream);
         this.reconstructor = new DefaultReconstructor(super.stdoutStream, super.stderrStream);
         this.httpClient = mock(CloseableHttpClient.class);
-
     }
 
     @Test
@@ -220,12 +219,10 @@ public class TestHttpSaver extends YesWorkflowTestCase {
 
         Assert.assertEquals(testSaveDtoString, ywResponse.ResponseBody);
     }
-    
+
     @Test
     public void testSave()
     {
         //TODO:: Integration Tests and Client Tests
     }
-
-
 }

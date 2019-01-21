@@ -40,7 +40,6 @@ public abstract class YwResponse<Dto> {
         return this.statusReason;
     }
 
-
     protected void build(HttpResponse response, IYwSerializer serializer)
     {
         this.serializer = serializer;

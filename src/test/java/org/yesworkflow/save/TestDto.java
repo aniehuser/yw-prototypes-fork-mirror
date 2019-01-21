@@ -12,5 +12,4 @@ public class TestDto
         this.two = two;
         this.three = three;
     }
-
 }

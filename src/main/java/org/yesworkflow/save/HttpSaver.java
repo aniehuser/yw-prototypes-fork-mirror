@@ -3,18 +3,17 @@ package org.yesworkflow.save;
 import java.util.Map;
 import java.util.Scanner;
 
-public class HttpSaver implements Saver {
-
-    private IYwSerializer ywSerializer = null;
-    private IClient client = null;
-    private String baseURL = "http://localhost:8000/";
-    private String username = null;
-    private String title = "Title";
-    private String description = "Description";
-    private String graph = "";
-    private String model = "";
-    private String model_checksum = "";
-    private String recon = "";
+public class HttpSaver implements Saver{
+    IYwSerializer ywSerializer = null;
+    IClient client = null;
+    String baseURL = "http://localhost:8000/";
+    String username = null;
+    String title = "Title";
+    String description = "Description";
+    String graph = "";
+    String model = "";
+    String model_checksum = "";
+    String recon = "";
 
     public HttpSaver(IYwSerializer ywSerializer){
         this.ywSerializer = ywSerializer;
