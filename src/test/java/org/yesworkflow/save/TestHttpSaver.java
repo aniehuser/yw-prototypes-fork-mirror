@@ -27,7 +27,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestHttpSaver extends YesWorkflowTestCase {
+public class TestHttpSaver extends YesWorkflowTestCase
+{
     private static final String testDtoString = "{\"one\":\"first\",\"two\":\"second\",\"three\":\"third\"}";
     private static final String testSaveDtoString = "{\"username\":\"crandoms\",\"title\":\"workflow\",\"description\":\"desc\",\"model\":\"mod\",\"model_checksum\":\"mod_check\",\"graph\":\"graph\",\"recon\":\"recon\"}";
 
@@ -38,7 +39,8 @@ public class TestHttpSaver extends YesWorkflowTestCase {
     private CloseableHttpClient httpClient = null;
 
     @Override
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         super.setUp();
         this.ywdb = YesWorkflowDB.createInMemoryDB();
         this.extractor = new DefaultExtractor(this.ywdb, super.stdoutStream, super.stderrStream);
@@ -48,7 +50,8 @@ public class TestHttpSaver extends YesWorkflowTestCase {
     }
 
     @Test
-    public void testJSONSerializer_serialize() {
+    public void testJSONSerializer_serialize()
+    {
         IYwSerializer serializer = new JSONSerializer();
 
         TestDto testDto = new TestDto("first", "second", "third");
