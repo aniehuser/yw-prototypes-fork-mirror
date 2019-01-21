@@ -66,9 +66,9 @@ public class TestHttpSaver extends YesWorkflowTestCase {
         TestDto actual = serializer.Deserialize(testDtoString, TestDto.class);
         TestDto expected = new TestDto("first", "second", "third");
 
-        Assert.assertEquals(actual.one, expected.one);
-        Assert.assertEquals(actual.two, expected.two);
-        Assert.assertEquals(actual.three, expected.three);
+        Assert.assertEquals(expected.one, actual.one);
+        Assert.assertEquals(expected.two, actual.two);
+        Assert.assertEquals(expected.three, actual.three);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class TestHttpSaver extends YesWorkflowTestCase {
         TestYwResponse ywResponse = new TestYwResponse();
         ywResponse.build(httpResponse, new JSONSerializer());
 
-        Assert.assertEquals(ywResponse.GetHeaderValue(headerName), headerValue);
+        Assert.assertEquals(headerValue, ywResponse.GetHeaderValue(headerName));
     }
 
     @Test
@@ -128,8 +128,8 @@ public class TestHttpSaver extends YesWorkflowTestCase {
 
         Assert.assertTrue(ywResponse.BadRequest);
         Assert.assertFalse(ywResponse.OK);
-        Assert.assertEquals(ywResponse.GetStatusReason(), statusReason);
-        Assert.assertEquals(ywResponse.GetStatusCode(), statusCode);
+        Assert.assertEquals(statusReason, ywResponse.GetStatusReason());
+        Assert.assertEquals(statusCode, ywResponse.GetStatusCode());
     }
 
     @Test
@@ -158,8 +158,8 @@ public class TestHttpSaver extends YesWorkflowTestCase {
 
         Assert.assertFalse(ywResponse.BadRequest);
         Assert.assertTrue(ywResponse.OK);
-        Assert.assertEquals(ywResponse.GetStatusReason(), statusReason);
-        Assert.assertEquals(ywResponse.GetStatusCode(), statusCode);
+        Assert.assertEquals(statusReason, ywResponse.GetStatusReason());
+        Assert.assertEquals(statusCode, ywResponse.GetStatusCode());
     }
 
     @Test
