@@ -1,8 +1,10 @@
-package org.yesworkflow.save;
+package org.yesworkflow.save.response;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpResponse;
+import org.yesworkflow.save.IYwSerializer;
+import org.yesworkflow.save.JSONSerializer;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -21,9 +23,9 @@ public abstract class YwResponse<Dto> {
     protected String statusReason;
     protected IYwSerializer serializer;
 
-    public abstract void Build(HttpResponse response, IYwSerializer serializer);
+    public abstract YwResponse<Dto> Build(HttpResponse response, IYwSerializer serializer);
 
-    protected abstract Dto DeserializeResponseContent(String json);
+    protected abstract Dto DeserializeResponseContent();
 
     public String GetHeaderValue(String headerName)
     {
@@ -52,7 +54,7 @@ public abstract class YwResponse<Dto> {
         this.BadRequest = this.statusCode >= 500;
         this.headers = AllocateHeaders(response);
         this.ResponseBody = ScanResponse(response);
-        this.ResponseObject = DeserializeResponseContent(this.ResponseBody);
+        this.ResponseObject = DeserializeResponseContent();
     }
 
     private String ScanResponse(HttpResponse response)
