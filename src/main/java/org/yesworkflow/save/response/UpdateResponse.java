@@ -19,6 +19,4 @@ public class UpdateResponse extends YwResponse<RunDto>
     {
         return serializer.Deserialize(this.ResponseBody, RunDto.class);
     }
-
-
 }

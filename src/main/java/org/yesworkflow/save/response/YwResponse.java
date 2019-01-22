@@ -11,7 +11,8 @@ import java.util.Hashtable;
 import java.util.Scanner;
 
 
-public abstract class YwResponse<Dto> {
+public abstract class YwResponse<Dto>
+{
     private String defaultEncoding = "UTF-8";
 
     public boolean OK;
