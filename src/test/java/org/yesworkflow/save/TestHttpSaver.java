@@ -190,7 +190,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     }
 
     @Test
-    public void testTagParse() throws Exception
+    public void testSaver_TagParse() throws Exception
     {
         IYwSerializer serializer = new JSONSerializer();
         HttpSaver saver = new HttpSaver(serializer);
@@ -203,6 +203,17 @@ public class TestHttpSaver extends YesWorkflowTestCase
         x.add("d");
         x.add("e");
         Assert.assertEquals(x, saver.tags);
+    }
+
+    @Test
+    public void testSaver_WorkflowParse() throws Exception
+    {
+        IYwSerializer serializer = new JSONSerializer();
+        HttpSaver saver = new HttpSaver(serializer);
+        Integer expected = 1;
+
+        saver.configure("workflow", "1");
+        Assert.assertEquals(expected, saver.workflowId);
     }
 
     private HttpResponse mockResponse(InputStream istream, StatusLine status, Header[] headers) throws IOException
