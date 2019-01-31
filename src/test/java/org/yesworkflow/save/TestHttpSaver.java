@@ -222,7 +222,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
         }
 
         if(headers == null)
-            headers = new Header[]{};
+            headers = new Header[] {};
 
         when(entity.getContent()).thenReturn(istream);
 
