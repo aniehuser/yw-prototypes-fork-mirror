@@ -11,7 +11,6 @@ public class SaveResponse extends YwResponse<RunDto>
     public YwResponse<RunDto> Build(HttpResponse response, IYwSerializer serializer)
     {
         build(response, serializer);
-        this.ResponseObject = DeserializeResponseContent();
         return this;
     }
 

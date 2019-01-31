@@ -187,7 +187,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
 
         Assert.assertEquals(runDtoJson, ywResponse.ResponseBody);
     }
-    
+
     private HttpResponse mockResponse(InputStream istream, StatusLine status, Header[] headers) throws IOException
     {
         HttpResponse res = mock(HttpResponse.class);

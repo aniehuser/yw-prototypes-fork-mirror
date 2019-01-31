@@ -71,7 +71,7 @@ public class HttpSaver implements Saver
                 username = (String) value;
                 break;
             case "workflow":
-                workflowId = (Integer) value;
+                workflowId = Integer.parseInt((String) value);
                 break;
             default:
                 break;
