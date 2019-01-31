@@ -189,6 +189,22 @@ public class TestHttpSaver extends YesWorkflowTestCase
         Assert.assertEquals(runDtoJson, ywResponse.ResponseBody);
     }
 
+    @Test
+    public void testTagParse() throws Exception
+    {
+        IYwSerializer serializer = new JSONSerializer();
+        HttpSaver saver = new HttpSaver(serializer);
+
+        saver.configure("tags", "a, b, c, d, e");
+        ArrayList<String> x = new ArrayList<String>();
+        x.add("a");
+        x.add("b");
+        x.add("c");
+        x.add("d");
+        x.add("e");
+        Assert.assertEquals(x, saver.tags);
+    }
+
     private HttpResponse mockResponse(InputStream istream, StatusLine status, Header[] headers) throws IOException
     {
         HttpResponse res = mock(HttpResponse.class);
@@ -215,24 +231,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
 
         return res;
     }
-
-    @Test
-    public void testTagParse() throws Exception 
-    {
-        IYwSerializer serializer = new JSONSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
-        
-        saver.configure("tags", "a, b, c, d, e");
-        ArrayList<String> x = new ArrayList<String>();
-        x.add("a");
-        x.add("b");
-        x.add("c");
-        x.add("d");
-        x.add("e");
-        Assert.assertEquals(x, saver.tags);
-    }
-
-
+    
     @Test
     public void testSave() throws Exception
     {
