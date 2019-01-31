@@ -210,17 +210,18 @@ public class TestHttpSaver extends YesWorkflowTestCase
         HttpResponse res = mock(HttpResponse.class);
         HttpEntity entity = mock(HttpEntity.class);
 
-        if (istream == null)
+        if(istream == null)
             istream = IOUtils.toInputStream(testDtoJson, StandardCharsets.UTF_8);
 
-        if (status == null) {
+        if(status == null)
+        {
             status = mock(StatusLine.class);
 
             when(status.getStatusCode()).thenReturn(200);
             when(status.getReasonPhrase()).thenReturn("OK");
         }
 
-        if (headers == null)
+        if(headers == null)
             headers = new Header[]{};
 
         when(entity.getContent()).thenReturn(istream);
@@ -231,7 +232,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
 
         return res;
     }
-    
+
     @Test
     public void testSave() throws Exception
     {
