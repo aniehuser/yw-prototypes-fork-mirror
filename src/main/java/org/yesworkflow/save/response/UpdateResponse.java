@@ -10,6 +10,7 @@ public class UpdateResponse extends YwResponse<RunDto>
     public YwResponse<RunDto> Build(HttpResponse response, IYwSerializer serializer)
     {
         this.build(response, serializer);
+        this.ResponseObject = DeserializeResponseContent();
         return this;
     }
 
