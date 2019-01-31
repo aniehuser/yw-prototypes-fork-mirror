@@ -47,7 +47,13 @@ public class HttpSaver implements Saver
     {
         client = new YwClient(baseURL, ywSerializer);
 
-        RunDto run = new RunDto(username, title, description, model, model_checksum, graph, recon, tags, sourceCodeList, sourceCodeListHash);
+        RunDto run = new RunDto.Builder(username, graph, model, model_checksum, recon)
+                                .setTitle(title)
+                                .setDescription(description)
+                                .setSourceCodeList(sourceCodeList)
+                                .setSourceCodeListHash(sourceCodeListHash)
+                                .setTags(tags)
+                                .build();
         try {
             YwResponse<RunDto> response;
             if(workflowId == null)
