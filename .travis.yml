@@ -16,11 +16,12 @@ install:
   - git clone https://github.com/aniehuser/senior-design-group10.git
   - cd senior-design-group10/scripts
   - ./deploy_python3.sh &
+  - sleep 5s
 ##### TODO:: remove the following lines once we have a signin/signup route #####
   - cd ../yw_website
   - echo "from django.contrib.auth.models import User; User.objects.create_superuser('niehuser', 'admin@example.com', 'pass')" | python3 manage.py shell
 ################################################################################
-  - sleep 5s
+
   - cd ../..
 script: mvn test
 jdk:
