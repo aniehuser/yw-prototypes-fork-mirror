@@ -37,20 +37,6 @@ public class RunDto {
         this.sourceCodeListHash=sourceCodeListHash;
     }
 
-    public RunDto(Builder builder)
-    {
-        this.username=builder.username;
-        this.title=builder.title;
-        this.description=builder.description;
-        this.model=builder.model;
-        this.model_checksum=builder.model_checksum;
-        this.graph=builder.graph;
-        this.recon=builder.recon;
-        this.tags=builder.tags;
-        this.sourceCodeList=builder.sourceCodeList;
-        this.sourceCodeListHash=builder.sourceCodeListHash;
-    }
-
     public static class Builder
     {
         private String username;
@@ -107,5 +93,19 @@ public class RunDto {
         {
             return new RunDto(this);
         }
+    }
+
+    public RunDto(Builder builder)
+    {
+        this.username=builder.username;
+        this.title=builder.title;
+        this.description=builder.description;
+        this.model=builder.model;
+        this.model_checksum=builder.model_checksum;
+        this.graph=builder.graph;
+        this.recon=builder.recon;
+        this.tags=builder.tags;
+        this.sourceCodeList=builder.sourceCodeList;
+        this.sourceCodeListHash=builder.sourceCodeListHash;
     }
 }
