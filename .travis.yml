@@ -17,6 +17,7 @@ install:
   - cd senior-design-group10/scripts
   - ./deploy_python3.sh &
   - sleep 5s
+  - cd ../..
 script: mvn test
 jdk:
   - openjdk10
