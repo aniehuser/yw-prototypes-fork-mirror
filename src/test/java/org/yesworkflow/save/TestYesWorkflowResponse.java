@@ -5,82 +5,27 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.yesworkflow.YesWorkflowTestCase;
-import org.yesworkflow.db.YesWorkflowDB;
-import org.yesworkflow.extract.DefaultExtractor;
-import org.yesworkflow.extract.Extractor;
-import org.yesworkflow.model.DefaultModeler;
-import org.yesworkflow.model.Modeler;
-import org.yesworkflow.recon.DefaultReconstructor;
-import org.yesworkflow.recon.Reconstructor;
+import org.yesworkflow.save.data.DummyResponse;
+import org.yesworkflow.save.data.TestData;
+import org.yesworkflow.save.data.TestDto;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestHttpSaver extends YesWorkflowTestCase
+public class TestYesWorkflowResponse extends YesWorkflowTestCase
 {
-<<<<<<< Updated upstream
-    private static final String testDtoJson = "{\"one\":\"first\",\"two\":\"second\",\"three\":\"third\"}";
-    private static final String runDtoJson = "{\"username\":\"crandoms\",\"title\":\"workflow\",\"description\":\"desc\",\"model\":\"mod\",\"model_checksum\":\"mod_check\",\"graph\":\"graph\",\"recon\":\"recon\"}";
-
-=======
->>>>>>> Stashed changes
-    private YesWorkflowDB ywdb = null;
-    private Extractor extractor = null;
-    private Modeler modeler = null;
-    private Reconstructor reconstructor = null;
-    private CloseableHttpClient httpClient = null;
-
-    @Override
-    public void setUp() throws Exception
-    {
-        super.setUp();
-        this.ywdb = YesWorkflowDB.createInMemoryDB();
-        this.extractor = new DefaultExtractor(this.ywdb, super.stdoutStream, super.stderrStream);
-        this.modeler = new DefaultModeler(this.ywdb, super.stdoutStream, super.stderrStream);
-        this.reconstructor = new DefaultReconstructor(super.stdoutStream, super.stderrStream);
-        this.httpClient = mock(CloseableHttpClient.class);
-    }
-
-    @Test
-<<<<<<< Updated upstream
-    public void testJSONSerializer_serialize()
-    {
-        IYwSerializer serializer = new JSONSerializer();
-
-        TestDto testDto = new TestDto("first", "second", "third");
-        String expectedOutput = testDtoJson;
-        String actualOutput = serializer.Serialize(testDto);
-
-        Assert.assertEquals(expectedOutput, actualOutput);
-    }
-
-    @Test
-    public void testJSONSerializer_deserialize()
-    {
-        IYwSerializer serializer = new JSONSerializer();
-
-        TestDto actual = serializer.Deserialize(testDtoJson, TestDto.class);
-        TestDto expected = new TestDto("first", "second", "third");
-
-        Assert.assertEquals(expected.one, actual.one);
-        Assert.assertEquals(expected.two, actual.two);
-        Assert.assertEquals(expected.three, actual.three);
-    }
-
     @Test
     public void testYwResponse_header() throws IOException
     {
@@ -95,7 +40,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
 
         HttpResponse httpResponse = mockResponse(null, null, headers);
 
-        ResponseTest ywResponse = new ResponseTest();
+        DummyResponse ywResponse = new DummyResponse();
         ywResponse.Build(httpResponse, new JSONSerializer());
 
         Assert.assertEquals(headerValue, ywResponse.GetHeaderValue(headerName));
@@ -114,7 +59,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
 
         HttpResponse httpResponse = mockResponse(null, statusLine, null);
 
-        ResponseTest ywResponse = new ResponseTest();
+        DummyResponse ywResponse = new DummyResponse();
         ywResponse.Build(httpResponse, new JSONSerializer());
 
         Assert.assertTrue(ywResponse.BadRequest);
@@ -136,7 +81,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
 
         HttpResponse httpResponse = mockResponse(null, statusLine, null);
 
-        ResponseTest ywResponse = new ResponseTest();
+        DummyResponse ywResponse = new DummyResponse();
         ywResponse.Build(httpResponse, new JSONSerializer());
 
         Assert.assertFalse(ywResponse.BadRequest);
@@ -149,17 +94,17 @@ public class TestHttpSaver extends YesWorkflowTestCase
     public void testYwResponse_Content() throws IOException
     {
         IYwSerializer serializer = new JSONSerializer();
-        InputStream inputStream = IOUtils.toInputStream(testDtoJson, StandardCharsets.UTF_8);
+        InputStream inputStream = IOUtils.toInputStream(TestData.testDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
 
-        ResponseTest ywResponse = new ResponseTest();
+        DummyResponse ywResponse = new DummyResponse();
         ywResponse.Build(httpResponse, serializer);
 
-        TestDto expectedObject = serializer.Deserialize(testDtoJson, TestDto.class);
+        TestDto expectedObject = serializer.Deserialize(TestData.testDtoJson, TestDto.class);
         TestDto actualObject = ywResponse.ResponseObject;
 
-        Assert.assertEquals(testDtoJson, ywResponse.ResponseBody);
+        Assert.assertEquals(TestData.testDtoJson, ywResponse.ResponseBody);
         Assert.assertEquals(expectedObject.one, actualObject.one);
         Assert.assertEquals(expectedObject.two, actualObject.two);
         Assert.assertEquals(expectedObject.three, actualObject.three);
@@ -169,63 +114,28 @@ public class TestHttpSaver extends YesWorkflowTestCase
     public void testSaveResponse_Content() throws IOException
     {
         IYwSerializer serializer = new JSONSerializer();
-        InputStream inputStream = IOUtils.toInputStream(runDtoJson, StandardCharsets.UTF_8);
+        InputStream inputStream = IOUtils.toInputStream(TestData.runDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
 
         SaveResponse ywResponse = new SaveResponse();
         ywResponse.Build(httpResponse, serializer);
 
-        Assert.assertEquals(runDtoJson, ywResponse.ResponseBody);
+        Assert.assertEquals(TestData.runDtoJson, ywResponse.ResponseBody);
     }
 
     @Test
     public void testUpdateResponse_Content() throws IOException
     {
         IYwSerializer serializer = new JSONSerializer();
-        InputStream inputStream = IOUtils.toInputStream(runDtoJson, StandardCharsets.UTF_8);
+        InputStream inputStream = IOUtils.toInputStream(TestData.runDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
 
         UpdateResponse ywResponse = new UpdateResponse();
         ywResponse.Build(httpResponse, serializer);
 
-        Assert.assertEquals(runDtoJson, ywResponse.ResponseBody);
-    }
-
-    @Test
-    public void testSaver_TagParse() throws Exception
-    {
-        IYwSerializer serializer = new JSONSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
-
-=======
-    public void testTagParse() throws Exception 
-    {
-        IYwSerializer serializer = new JSONSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
-        
->>>>>>> Stashed changes
-        saver.configure("tags", "a, b, c, d, e");
-        ArrayList<String> x = new ArrayList<String>();
-        x.add("a");
-        x.add("b");
-        x.add("c");
-        x.add("d");
-        x.add("e");
-        Assert.assertEquals(x, saver.tags);
-    }
-
-    @Test
-<<<<<<< Updated upstream
-    public void testSaver_WorkflowParse() throws Exception
-    {
-        IYwSerializer serializer = new JSONSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
-        Integer expected = 1;
-
-        saver.configure("workflow", "1");
-        Assert.assertEquals(expected, saver.workflowId);
+        Assert.assertEquals(TestData.runDtoJson, ywResponse.ResponseBody);
     }
 
     private HttpResponse mockResponse(InputStream istream, StatusLine status, Header[] headers) throws IOException
@@ -234,7 +144,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
         HttpEntity entity = mock(HttpEntity.class);
 
         if(istream == null)
-            istream = IOUtils.toInputStream(testDtoJson, StandardCharsets.UTF_8);
+            istream = IOUtils.toInputStream(TestData.testDtoJson, StandardCharsets.UTF_8);
 
         if(status == null)
         {
@@ -254,14 +164,5 @@ public class TestHttpSaver extends YesWorkflowTestCase
         when(res.getStatusLine()).thenReturn(status);
 
         return res;
-    }
-
-    @Test
-=======
->>>>>>> Stashed changes
-    public void testSave() throws Exception
-    {
-        //TODO:: Integration Tests and Client Tests
-
     }
 }
