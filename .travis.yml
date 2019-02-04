@@ -4,7 +4,7 @@ before-install:
 install:
   - git clone https://github.com/aniehuser/senior-design-group10.git
   - cd senior-design-group10/scripts
-  - ./python3_deploy.sh
+  - ./deploy_python3.sh
 script: mvn test
 jdk:
   - openjdk10
