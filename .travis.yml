@@ -1,9 +1,11 @@
 language: java
 install:
+  - sudo add-apt-repository ppa:jonathonf/python-3.6
+  - sudo apt-get update
+  - sudo apt-get install python3.6
+  - python3 -V
   - git clone https://github.com/aniehuser/senior-design-group10.git
   - cd senior-design-group10/scripts
-  - python -V
-  - python3 -V
   - ./deploy_python3.sh
 script: mvn test
 jdk:
