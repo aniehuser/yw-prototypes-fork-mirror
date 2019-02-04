@@ -1,6 +1,7 @@
 language: java
 install:
   - sudo add-apt-repository ppa:jonathonf/python-3.6
+  - echo
   - sudo apt-get update
   - sudo apt-get install python3.6
   - python3 -V
