@@ -1,8 +1,10 @@
 language: java
+before-install:
+  - sudo apt-get install python3.6
 install:
   - git clone https://github.com/aniehuser/senior-design-group10.git
   - cd senior-design-group10/scripts
-  - ./python_deploy.sh
+  - ./python3_deploy.sh
 script: mvn test
 jdk:
   - openjdk10
