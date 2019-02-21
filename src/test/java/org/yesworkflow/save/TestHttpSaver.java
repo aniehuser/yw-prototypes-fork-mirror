@@ -9,6 +9,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.yesworkflow.YesWorkflowTestCase;
 import org.yesworkflow.db.YesWorkflowDB;
@@ -25,11 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class TestHttpSaver extends YesWorkflowTestCase
 {
     private YesWorkflowDB ywdb = null;
@@ -76,9 +78,27 @@ public class TestHttpSaver extends YesWorkflowTestCase
     }
 
     @Test
-    public void testSave() throws Exception
+    public void testSaver_FormatUrl() throws Exception
     {
-        //TODO:: Integration Tests and Client Tests
+        IYwSerializer serializer = new JSONSerializer();
+        HttpSaver saver = new HttpSaver(serializer);
 
+        String[][] testData = new String[][]{
+                {"url", "http://url/"},
+                {"url/", "http://url/"},
+                {"http://url", "http://url/"},
+                {"http://url/", "http://url/"},
+                {"https://url", "https://url/"},
+                {"https://url/", "https://url/"},
+                {"", "http://"},
+        };
+
+        for(String[] dataPoint : testData)
+        {
+            saver.configure("serveraddress", dataPoint[0]);
+            assertEquals(String.format("Saver transformed '%s' to  '%s'", dataPoint[0], saver.baseUrl),
+                         dataPoint[1],
+                         saver.baseUrl);
+        }
     }
 }
