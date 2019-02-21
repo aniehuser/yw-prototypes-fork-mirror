@@ -114,7 +114,6 @@ public class HttpSaver implements Saver
 
     private String formatUrl(String url)
     {
-
         if(!url.startsWith("http://") && !url.startsWith("https://"))
             url = "http://" + url;
 
