@@ -1,15 +1,9 @@
 package org.yesworkflow.save;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.yesworkflow.YesWorkflowTestCase;
 import org.yesworkflow.db.YesWorkflowDB;
@@ -19,19 +13,12 @@ import org.yesworkflow.model.DefaultModeler;
 import org.yesworkflow.model.Modeler;
 import org.yesworkflow.recon.DefaultReconstructor;
 import org.yesworkflow.recon.Reconstructor;
-import org.yesworkflow.save.response.SaveResponse;
-import org.yesworkflow.save.response.UpdateResponse;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TestHttpSaver extends YesWorkflowTestCase
 {
     private YesWorkflowDB ywdb = null;
