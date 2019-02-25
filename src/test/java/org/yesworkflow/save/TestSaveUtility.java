@@ -20,7 +20,7 @@ public class TestSaveUtility extends YesWorkflowTestCase
     @Test
     public void testJSONSerializer_serialize()
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
 
         TestDto testDto = new TestDto("first", "second", "third");
         String expectedOutput = TestData.testDtoJson;
@@ -32,7 +32,7 @@ public class TestSaveUtility extends YesWorkflowTestCase
     @Test
     public void testJSONSerializer_serializeNestedDto()
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         ScriptDto scriptDto = new ScriptDto("n", "c", "cs");
         String scriptJson = serializer.Serialize(scriptDto);
 
@@ -51,7 +51,7 @@ public class TestSaveUtility extends YesWorkflowTestCase
     @Test
     public void testJSONSerializer_deserialize()
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
 
         TestDto actual = serializer.Deserialize(TestData.testDtoJson, TestDto.class);
         TestDto expected = new TestDto("first", "second", "third");

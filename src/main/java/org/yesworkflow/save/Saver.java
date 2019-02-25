@@ -11,7 +11,7 @@ public interface Saver extends YWStage, Configurable
     Saver configure(Map<String, Object> config) throws Exception;
     Saver configure(String key, Object value) throws Exception;
     Saver build(String model, String graph, String recon, List<String> sourceCodeList, List<String> sourcePaths);
-    Saver save();
+    Saver save() throws Exception;
 }
 
 

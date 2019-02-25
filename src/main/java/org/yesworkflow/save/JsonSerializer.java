@@ -6,11 +6,11 @@ import com.google.gson.JsonParseException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class JSONSerializer implements IYwSerializer
+public class JsonSerializer implements IYwSerializer
 {
 
     private Gson gson;
-    public JSONSerializer()
+    public JsonSerializer()
     {
         gson = new Gson();
     }

@@ -1,10 +1,5 @@
 package org.yesworkflow.save;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,16 +13,10 @@ import org.yesworkflow.model.DefaultModeler;
 import org.yesworkflow.model.Modeler;
 import org.yesworkflow.recon.DefaultReconstructor;
 import org.yesworkflow.recon.Reconstructor;
-import org.yesworkflow.save.response.SaveResponse;
-import org.yesworkflow.save.response.UpdateResponse;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestHttpSaver extends YesWorkflowTestCase
@@ -52,7 +41,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     @Test
     public void testSaver_TagParse() throws Exception
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         HttpSaver saver = new HttpSaver(serializer);
         saver.configure("tags", "a, b, c, d, e");
         ArrayList<String> x = new ArrayList<String>();
@@ -67,7 +56,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     @Test
     public void testSaver_WorkflowParse() throws Exception
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         HttpSaver saver = new HttpSaver(serializer);
         Integer expected = 1;
 

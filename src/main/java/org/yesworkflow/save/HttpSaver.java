@@ -46,7 +46,7 @@ public class HttpSaver implements Saver
         return this;
     }
 
-    public Saver save()
+    public Saver save() throws Exception
     {
         client = new YwClient(baseURL, ywSerializer);
 
@@ -55,21 +55,30 @@ public class HttpSaver implements Saver
                                 .setDescription(description)
                                 .setTags(tags)
                                 .build();
-        try {
-            if(workflowId == null) {
-                SaveResponse response = client.SaveRun(run);
-                System.out.println(String.format("Status: %d %s ", response.GetStatusCode(), response.GetStatusReason()));
-                System.out.println(String.format("Body:   %s", response.ResponseBody));
-            }
-            else {
-                UpdateResponse response = client.UpdateWorkflow(workflowId, run);
-                System.out.println(String.format("Status: %d %s ", response.GetStatusCode(), response.GetStatusReason()));
-                System.out.println(String.format("Body:   %s", response.ResponseBody));
-            }
 
-        } catch (Exception e) {
-            System.out.println("error " + e.getMessage());
+        String message = "Succesfully uploaded this run to %s.\nWorkflow ID: %d\nVersion: %d\nRun Number: %d";
+        if(workflowId == null) {
+            SaveResponse response = client.SaveRun(run);
+            message = String.format(message,
+                                    baseURL,
+                                    response.ResponseObject.workflowId,
+                                    response.ResponseObject.versionNumber,
+                                    response.ResponseObject.runNumber);
         }
+        else {
+            UpdateResponse response = client.UpdateWorkflow(workflowId, run);
+            String newVersionMessage = "\nChanges to the workflow script created a new version of your workflow on the server.";
+            message = String.format(message,
+                                    baseURL,
+                                    response.ResponseObject.workflowId,
+                                    response.ResponseObject.versionNumber,
+                                    response.ResponseObject.runNumber);
+
+            if(response.ResponseObject.newVersion)
+                message = message + newVersionMessage;
+        }
+
+        System.out.println(message);
 
         return this;
     }

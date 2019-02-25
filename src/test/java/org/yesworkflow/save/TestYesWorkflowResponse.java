@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.yesworkflow.YesWorkflowTestCase;
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.save.data.DummyResponse;
 import org.yesworkflow.save.data.TestData;
 import org.yesworkflow.save.data.TestDto;
@@ -29,7 +30,7 @@ import static org.mockito.Mockito.when;
 public class TestYesWorkflowResponse extends YesWorkflowTestCase
 {
     @Test
-    public void testYwResponse_header() throws IOException
+    public void testYwResponse_header() throws IOException, YwSaveException
     {
         String headerName = "Content-Type";
         String headerValue = "application/json";
@@ -43,13 +44,13 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
         HttpResponse httpResponse = mockResponse(null, null, headers);
 
         DummyResponse ywResponse = new DummyResponse();
-        ywResponse.Build(httpResponse, new JSONSerializer());
+        ywResponse.Build(httpResponse, new JsonSerializer());
 
         Assert.assertEquals(headerValue, ywResponse.GetHeaderValue(headerName));
     }
 
     @Test
-    public void testYWResponse_BadRequest() throws IOException
+    public void testYWResponse_BadRequest() throws IOException, YwSaveException
     {
         int statusCode = 500;
         String statusReason = "Bad Request";
@@ -62,7 +63,7 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
         HttpResponse httpResponse = mockResponse(null, statusLine, null);
 
         DummyResponse ywResponse = new DummyResponse();
-        ywResponse.Build(httpResponse, new JSONSerializer());
+        ywResponse.Build(httpResponse, new JsonSerializer());
 
         Assert.assertTrue(ywResponse.BadRequest);
         Assert.assertFalse(ywResponse.OK);
@@ -71,7 +72,7 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
     }
 
     @Test
-    public void testYWResponse_OkResponse() throws IOException
+    public void testYWResponse_OkResponse() throws IOException, YwSaveException
     {
         int statusCode = 200;
         String statusReason = "OK";
@@ -84,7 +85,7 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
         HttpResponse httpResponse = mockResponse(null, statusLine, null);
 
         DummyResponse ywResponse = new DummyResponse();
-        ywResponse.Build(httpResponse, new JSONSerializer());
+        ywResponse.Build(httpResponse, new JsonSerializer());
 
         Assert.assertFalse(ywResponse.BadRequest);
         Assert.assertTrue(ywResponse.OK);
@@ -93,9 +94,9 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
     }
 
     @Test
-    public void testYwResponse_Content() throws IOException
+    public void testYwResponse_Content() throws IOException, YwSaveException
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         InputStream inputStream = IOUtils.toInputStream(TestData.testDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
@@ -113,9 +114,9 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
     }
 
     @Test
-    public void testSaveResponse_Content() throws IOException
+    public void testSaveResponse_Content() throws IOException, YwSaveException
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         InputStream inputStream = IOUtils.toInputStream(TestData.runDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
@@ -127,9 +128,9 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
     }
 
     @Test
-    public void testUpdateResponse_Content() throws IOException
+    public void testUpdateResponse_Content() throws IOException, YwSaveException
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         InputStream inputStream = IOUtils.toInputStream(TestData.runDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
@@ -141,9 +142,9 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
     }
 
     @Test
-    public void testLoginResponse_Content() throws IOException
+    public void testLoginResponse_Content() throws IOException, YwSaveException
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         InputStream inputStream = IOUtils.toInputStream(TestData.runDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);
@@ -155,9 +156,9 @@ public class TestYesWorkflowResponse extends YesWorkflowTestCase
     }
 
     @Test
-    public void testLogoutResponse_Content() throws IOException
+    public void testLogoutResponse_Content() throws IOException, YwSaveException
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         InputStream inputStream = IOUtils.toInputStream(TestData.runDtoJson, StandardCharsets.UTF_8);
 
         HttpResponse httpResponse = mockResponse(inputStream, null, null);

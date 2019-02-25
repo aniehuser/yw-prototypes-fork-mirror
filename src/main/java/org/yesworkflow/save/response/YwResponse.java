@@ -1,11 +1,14 @@
 package org.yesworkflow.save.response;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.save.IYwSerializer;
-import org.yesworkflow.save.JSONSerializer;
+import org.yesworkflow.save.JsonSerializer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Scanner;
 
@@ -22,7 +25,7 @@ public abstract class YwResponse<Dto>
     protected String statusReason;
     protected IYwSerializer serializer;
 
-    public abstract YwResponse<Dto> Build(HttpResponse response, IYwSerializer serializer);
+    public abstract YwResponse<Dto> Build(HttpResponse response, IYwSerializer serializer) throws YwSaveException;
 
     protected abstract Dto DeserializeResponseContent();
 
@@ -42,10 +45,11 @@ public abstract class YwResponse<Dto>
     }
 
     protected void build(HttpResponse response, IYwSerializer serializer)
+            throws YwSaveException
     {
         this.serializer = serializer;
         if(this.serializer == null)
-            this.serializer = new JSONSerializer();
+            this.serializer = new JsonSerializer();
 
         this.statusCode = response.getStatusLine().getStatusCode();
         this.statusReason = response.getStatusLine().getReasonPhrase();
@@ -56,15 +60,15 @@ public abstract class YwResponse<Dto>
         this.ResponseObject = DeserializeResponseContent();
     }
 
-    private String ScanResponse(HttpResponse response)
+    private String ScanResponse(HttpResponse response) throws YwSaveException
     {
-        String responseBody = "";
-        try{
-            Scanner scanner = new Scanner(response.getEntity().getContent(), defaultEncoding).useDelimiter("\\A");
+        String responseBody;
+        try(InputStream content = response.getEntity().getContent()){
+            Scanner scanner = new Scanner(content, defaultEncoding).useDelimiter("\\A");
             responseBody = scanner.next();
         } catch(IOException ioe)
         {
-            // TODO:: Error handling
+            throw new YwSaveException(String.format("Invalid content encoding: %s", ioe.getMessage()));
         }
         return responseBody;
     }
