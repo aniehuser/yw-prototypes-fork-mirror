@@ -23,7 +23,7 @@ import org.yesworkflow.model.Modeler;
 import org.yesworkflow.recon.DefaultReconstructor;
 import org.yesworkflow.recon.Reconstructor;
 import org.yesworkflow.recon.Run;
-import org.yesworkflow.save.JSONSerializer;
+import org.yesworkflow.save.JsonSerializer;
 import org.yesworkflow.save.Saver;
 import org.yesworkflow.save.HttpSaver;
 
@@ -459,7 +459,7 @@ public class YesWorkflowCLI {
 
     private void save() throws Exception {
         if (saver == null) {
-            saver = new HttpSaver(new JSONSerializer());
+            saver = new HttpSaver(new JsonSerializer());
         }
         List<String> sourceCodeList = extractor.getSourceCodeList();
         List<String> sourcePaths = extractor.getSourcePaths();

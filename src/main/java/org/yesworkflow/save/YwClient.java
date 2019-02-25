@@ -7,6 +7,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.save.data.LoginDto;
 import org.yesworkflow.save.data.RegisterDto;
 import org.yesworkflow.save.data.RunDto;
@@ -29,19 +30,20 @@ public class YwClient implements IClient {
         this.serializer = serializer;
     }
 
-    // TODO::create ping response
-
     public PingResponse Ping()
+            throws YwSaveException
     {
         return executeGetRequest("save/ping/", PingResponse.class);
     }
 
     public RegisterResponse CreateUser(RegisterDto registerDto)
+            throws YwSaveException
     {
         return executePostRequest("rest-auth/registration/", registerDto, RegisterResponse.class);
     }
 
     public LoginResponse Login(LoginDto loginDto)
+            throws YwSaveException
     {
         LoginResponse response = executePostRequest("rest-auth/login/", loginDto, LoginResponse.class);
         if(response.OK)
@@ -51,22 +53,25 @@ public class YwClient implements IClient {
     }
 
     public LogoutResponse Logout()
+            throws YwSaveException
     {
         return executePostRequest("rest-auth/logout/", null, LogoutResponse.class);
     }
 
     public SaveResponse SaveRun(RunDto runDto)
+            throws YwSaveException
     {
         return executePostRequest("save/", runDto, SaveResponse.class);
     }
 
     public UpdateResponse UpdateWorkflow(Integer workflowId, RunDto runDto)
+            throws YwSaveException
     {
         return executePostRequest(String.format("save/%d/", workflowId), runDto, UpdateResponse.class);
     }
 
-    private <Response extends YwResponse<?>> Response executeGetRequest(String route,
-                                                                        Class<Response> rClass)
+    private <Response extends YwResponse<?>> Response executeGetRequest(String route, Class<Response> rClass)
+            throws YwSaveException
     {
         HttpGet getRequest = new HttpGet(String.join("", baseUrl, route));
         getRequest.addHeader("accept", "application/json");
@@ -76,9 +81,10 @@ public class YwClient implements IClient {
     private <Response extends YwResponse<?>> Response executePostRequest(String route,
                                                                          Object Dto,
                                                                          Class<Response> rClass)
+            throws YwSaveException
     {
         HttpPost postRequest = new HttpPost(String.join("", baseUrl, route));
-        Response response = null;
+        Response response;
         try
         {
             StringEntity json = new StringEntity(serializer.Serialize(Dto));
@@ -89,21 +95,20 @@ public class YwClient implements IClient {
             response = executeRequest(postRequest, rClass);
         } catch (UnsupportedEncodingException e)
         {
-            System.out.println(e.getMessage());
+            throw new YwSaveException("Unexpected error: " + e.getMessage());
         }
         return response;
     }
 
     private <Response extends YwResponse<?>> Response executeRequest(HttpRequestBase request,
                                                                      Class<Response> rClass)
+            throws YwSaveException
     {
-        HttpResponse httpResponse = null;
-        Exception exception = null;
+        HttpResponse httpResponse;
         try {
             httpResponse = client.execute(request);
         } catch (IOException e) {
-            //TODO:: think about handling
-            System.out.println(exception.getMessage());
+            throw new YwSaveException("There was a problem connecting to " + baseUrl);
         }
 
         Response ywResponse = null;
@@ -114,20 +119,25 @@ public class YwClient implements IClient {
         }
         catch (ReflectiveOperationException e)
         {
-            //TODO:: handle better
+            throw new YwSaveException("Unexpected error: " + ywResponse.ResponseBody);
+        }
+
+        if(ywResponse.BadRequest){
+            throw new YwSaveException(String.format("%s was unable to process the request: %s", baseUrl, ywResponse.GetStatusReason()));
+        } else if(ywResponse.GetStatusCode() >= 400) {
+            throw new YwSaveException(String.format("There was an error trying to access %s: %s", baseUrl, ywResponse.GetStatusReason()));
         }
 
         return ywResponse;
     }
 
-    public IClient Close()
+    public IClient Close() throws YwSaveException
     {
         try{
             client.close();
         } catch (IOException e)
         {
-            // TODO:: handle better
-            System.out.println(e.getMessage());
+            throw new YwSaveException("Error terminating program.");
         }
 
         return this;

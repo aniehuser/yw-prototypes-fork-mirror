@@ -1,6 +1,7 @@
 package org.yesworkflow.save;
 
 import org.junit.*;
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.*;
 
@@ -42,7 +43,7 @@ public class TestYwClient
         connection = String.format("http://%s:%d/",
                                    TestData.testingurl,
                                    TestData.testingport);
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         client = new YwClient(connection, serializer);
     }
 
@@ -53,7 +54,7 @@ public class TestYwClient
     }
 
     @Test
-    public void testYwClient_Ping()
+    public void testYwClient_Ping() throws YwSaveException
     {
         PingResponse response = client.Ping();
         assertTrue(response.OK);
@@ -62,7 +63,7 @@ public class TestYwClient
     }
 
     @Test
-    public void testYwClient_Save()
+    public void testYwClient_Save() throws YwSaveException
     {
         String username = UUID.randomUUID().toString();
         String password = "Passoword!@#";
@@ -85,7 +86,7 @@ public class TestYwClient
     }
 
     @Test
-    public void testYwClient_Register()
+    public void testYwClient_Register() throws YwSaveException
     {
         RegisterDto registerDto = new RegisterDto.Builder(UUID.randomUUID().toString(), "Password!@#")
                                                     .build();
@@ -96,7 +97,7 @@ public class TestYwClient
     }
 
     @Test
-    public void testYwClient_Login()
+    public void testYwClient_Login() throws YwSaveException
     {
         RegisterDto registerDto = new RegisterDto.Builder(UUID.randomUUID().toString(), "Password!@#")
                 .build();
@@ -112,7 +113,7 @@ public class TestYwClient
     }
 
     @Test
-    public void testYwClient_Logout()
+    public void testYwClient_Logout() throws YwSaveException
     {
         RegisterDto registerDto = new RegisterDto.Builder(UUID.randomUUID().toString(), "Password!@#")
                 .build();
@@ -130,7 +131,7 @@ public class TestYwClient
     }
 
     @Test
-    public void testYwClient_UpdateWorkflow()
+    public void testYwClient_UpdateWorkflow() throws YwSaveException
     {
         String username = UUID.randomUUID().toString();
         String password = "Passoword!@#";
@@ -155,4 +156,53 @@ public class TestYwClient
         assertEquals(updateResponse.ResponseObject.runNumber, saveResponse.ResponseObject.runNumber + 1);
         assertFalse(updateResponse.ResponseObject.newVersion);
     }
+
+    @Test(expected = YwSaveException.class)
+    public void TestYwClient_BadConnection() throws YwSaveException
+    {
+        String badConnectionString = "badurl";
+        IYwSerializer serializer = new JsonSerializer();
+        IClient badClient = new YwClient(badConnectionString, serializer);
+        badClient.Ping();
+    }
+
+    @Test(expected = YwSaveException.class)
+    public void TestYwClient_BadSaveUsername() throws YwSaveException
+    {
+        String username = UUID.randomUUID().toString();
+        ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
+        ArrayList<ScriptDto> scripts = new ArrayList<>();
+        scripts.add(scriptDto);
+        RunDto run = new RunDto.Builder(username, "model", "check", "graph", "recon", scripts)
+                .build();
+
+        client.SaveRun(run);
+    }
+
+//    TODO:: fix bug where different user can update a workflow server side
+//    @Test(expected = YwSaveException.class)
+//    public void TestYwClient_BadUpdateUsername() throws YwSaveException
+//    {
+//        String username = UUID.randomUUID().toString();
+//        String badUsername = UUID.randomUUID().toString();
+//        String password = "Passoword!@#";
+//
+//        RegisterDto registerDto = new RegisterDto.Builder(username, password).build();
+//        LoginDto loginDto = new LoginDto.Builder(username, password).build();
+//
+//        client.CreateUser(registerDto);
+//        client.Login(loginDto);
+//        ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
+//        ArrayList<ScriptDto> scripts = new ArrayList<>();
+//        scripts.add(scriptDto);
+//        RunDto run = new RunDto.Builder(username, "model", "check", "graph", "recon", scripts)
+//                .build();
+//
+//        SaveResponse saveResponse = client.SaveRun(run);
+//        RunDto badRun = new RunDto.Builder(badUsername, "model", "check", "graph", "recon", scripts)
+//                .build();
+//
+//        UpdateResponse updateResponse = client.UpdateWorkflow(saveResponse.ResponseObject.workflowId, badRun);
+//        int x = 5;
+//    }
 }

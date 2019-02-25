@@ -41,7 +41,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     @Test
     public void testSaver_TagParse() throws Exception
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         HttpSaver saver = new HttpSaver(serializer);
         saver.configure("tags", "a, b, c, d, e");
         ArrayList<String> x = new ArrayList<String>();
@@ -56,7 +56,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     @Test
     public void testSaver_WorkflowParse() throws Exception
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         HttpSaver saver = new HttpSaver(serializer);
         Integer expected = 1;
 
@@ -67,7 +67,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     @Test
     public void testSaver_FormatUrl() throws Exception
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         HttpSaver saver = new HttpSaver(serializer);
 
         String[][] testData = new String[][]{
