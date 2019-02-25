@@ -21,7 +21,7 @@ public class HttpSaver implements Saver
     String description = "Description";
     String graph = "";
     String model = "";
-    String model_checksum = "temp";
+    String modelChecksum = "";
     String recon = "";
     List<String> tags = new ArrayList<String>();
     List<ScriptDto> scripts = null;
@@ -50,7 +50,7 @@ public class HttpSaver implements Saver
     {
         client = new YwClient(baseUrl, ywSerializer);
 
-        RunDto run = new RunDto.Builder(username, model, model_checksum, graph, recon, scripts)
+        RunDto run = new RunDto.Builder(username, model, modelChecksum, graph, recon, scripts)
                                 .setTitle(title)
                                 .setDescription(description)
                                 .setTags(tags)
