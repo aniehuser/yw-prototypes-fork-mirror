@@ -15,13 +15,13 @@ public class HttpSaver implements Saver
     IYwSerializer ywSerializer = null;
     IClient client = null;
     Integer workflowId = null;
-    String baseURL = "http://localhost:8000/";
+    String baseUrl = "http://localhost:8000/";
     String username = null;
     String title = "Title";
     String description = "Description";
     String graph = "";
     String model = "";
-    String model_checksum = "";
+    String modelChecksum = "";
     String recon = "";
     List<String> tags = new ArrayList<String>();
     List<ScriptDto> scripts = null;
@@ -48,9 +48,9 @@ public class HttpSaver implements Saver
 
     public Saver save() throws Exception
     {
-        client = new YwClient(baseURL, ywSerializer);
+        client = new YwClient(baseUrl, ywSerializer);
 
-        RunDto run = new RunDto.Builder(username, graph, model, model_checksum, recon, scripts)
+        RunDto run = new RunDto.Builder(username, model, modelChecksum, graph, recon, scripts)
                                 .setTitle(title)
                                 .setDescription(description)
                                 .setTags(tags)
@@ -96,7 +96,7 @@ public class HttpSaver implements Saver
         switch(key.toLowerCase())
         {
             case "serveraddress":
-                baseURL = (String) value;
+                baseUrl = formatUrl((String) value);
                 break;
             case "username":
                 username = (String) value;
@@ -119,5 +119,16 @@ public class HttpSaver implements Saver
         }
 
         return this;
+    }
+
+    private String formatUrl(String url)
+    {
+        if(!url.startsWith("http://") && !url.startsWith("https://"))
+            url = "http://" + url;
+
+        if(!url.endsWith("/"))
+            url = url + "/";
+
+        return url;
     }
 }
