@@ -60,7 +60,7 @@ public class HttpSaver implements Saver
         if(workflowId == null) {
             SaveResponse response = client.SaveRun(run);
             message = String.format(message,
-                                    baseURL,
+                                    baseUrl,
                                     response.ResponseObject.workflowId,
                                     response.ResponseObject.versionNumber,
                                     response.ResponseObject.runNumber);
@@ -69,7 +69,7 @@ public class HttpSaver implements Saver
             UpdateResponse response = client.UpdateWorkflow(workflowId, run);
             String newVersionMessage = "\nChanges to the workflow script created a new version of your workflow on the server.";
             message = String.format(message,
-                                    baseURL,
+                                    baseUrl,
                                     response.ResponseObject.workflowId,
                                     response.ResponseObject.versionNumber,
                                     response.ResponseObject.runNumber);

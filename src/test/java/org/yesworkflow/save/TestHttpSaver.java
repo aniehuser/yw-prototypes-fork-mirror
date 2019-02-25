@@ -67,7 +67,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     @Test
     public void testSaver_FormatUrl() throws Exception
     {
-        IYwSerializer serializer = new JSONSerializer();
+        IYwSerializer serializer = new JsonSerializer();
         HttpSaver saver = new HttpSaver(serializer);
 
         String[][] testData = new String[][]{
