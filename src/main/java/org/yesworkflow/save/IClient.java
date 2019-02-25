@@ -15,5 +15,5 @@ public interface IClient {
     LogoutResponse Logout() throws YwSaveException;
     SaveResponse SaveRun(RunDto runDto) throws YwSaveException;
     UpdateResponse UpdateWorkflow(Integer workflowId, RunDto runDto) throws YwSaveException;
-    IClient Close() throws IOException;
+    IClient Close() throws YwSaveException;
 }

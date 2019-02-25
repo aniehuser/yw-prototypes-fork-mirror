@@ -131,13 +131,13 @@ public class YwClient implements IClient {
         return ywResponse;
     }
 
-    public IClient Close()
+    public IClient Close() throws YwSaveException
     {
         try{
             client.close();
         } catch (IOException e)
         {
-            System.out.println(e.getMessage());
+            throw new YwSaveException("Error terminating program.");
         }
 
         return this;
