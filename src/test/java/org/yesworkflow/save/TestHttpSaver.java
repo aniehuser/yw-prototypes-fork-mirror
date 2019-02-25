@@ -1,10 +1,5 @@
 package org.yesworkflow.save;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,16 +13,10 @@ import org.yesworkflow.model.DefaultModeler;
 import org.yesworkflow.model.Modeler;
 import org.yesworkflow.recon.DefaultReconstructor;
 import org.yesworkflow.recon.Reconstructor;
-import org.yesworkflow.save.response.SaveResponse;
-import org.yesworkflow.save.response.UpdateResponse;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestHttpSaver extends YesWorkflowTestCase
@@ -76,9 +65,27 @@ public class TestHttpSaver extends YesWorkflowTestCase
     }
 
     @Test
-    public void testSave() throws Exception
+    public void testSaver_FormatUrl() throws Exception
     {
-        //TODO:: Integration Tests and Client Tests
+        IYwSerializer serializer = new JSONSerializer();
+        HttpSaver saver = new HttpSaver(serializer);
 
+        String[][] testData = new String[][]{
+                {"url", "http://url/"},
+                {"url/", "http://url/"},
+                {"http://url", "http://url/"},
+                {"http://url/", "http://url/"},
+                {"https://url", "https://url/"},
+                {"https://url/", "https://url/"},
+                {"", "http://"},
+        };
+
+        for(String[] dataPoint : testData)
+        {
+            saver.configure("serveraddress", dataPoint[0]);
+            assertEquals(String.format("Saver transformed '%s' to  '%s'", dataPoint[0], saver.baseUrl),
+                         dataPoint[1],
+                         saver.baseUrl);
+        }
     }
 }
