@@ -50,6 +50,9 @@ public class HttpSaver implements Saver
     {
         client = new YwClient(baseUrl, ywSerializer);
 
+        // TODO:: make model string representation and take checksum.
+        modelChecksum = scripts.get(0).checksum;
+
         RunDto run = new RunDto.Builder(username, model, modelChecksum, graph, recon, scripts)
                                 .setTitle(title)
                                 .setDescription(description)
