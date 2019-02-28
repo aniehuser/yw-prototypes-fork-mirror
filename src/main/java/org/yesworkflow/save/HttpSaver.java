@@ -1,7 +1,7 @@
 package org.yesworkflow.save;
 
-import org.yesworkflow.save.data.RunDto;
-import org.yesworkflow.save.data.ScriptDto;
+import org.yesworkflow.model.*;
+import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
 
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class HttpSaver implements Saver
 {
@@ -17,22 +18,32 @@ public class HttpSaver implements Saver
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
     String username = null;
-    String title = "Title";
-    String description = "Description";
+    String title = null;
+    String description = null;
     String graph = "";
-    String model = "";
+    Model model = null;
     String modelChecksum = "";
     String recon = "";
-    List<String> tags = new ArrayList<String>();
+    List<String> tags = null;
     List<ScriptDto> scripts = null;
+    List<DataDto> data = null;
+    List<ChannelDto> channels = null;
+    List<PortDto> ports = null;
+    List<ProgramBlockDto> programBlocks = null;
 
     public HttpSaver(IYwSerializer ywSerializer){
         this.ywSerializer = ywSerializer;
+        tags = new ArrayList<>();
+        scripts = new ArrayList<>();
+        data = new ArrayList<>();
+        channels = new ArrayList<>();
+        ports = new ArrayList<>();
+        programBlocks = new ArrayList<>();
     }
 
-    public Saver build(String model, String graph, String recon, List<String> sourceCodeList, List<String> sourcePaths)
+    public Saver build(Model model, String graph, String recon, List<String> sourceCodeList, List<String> sourcePaths)
     {
-        this.model = model;
+        this.model = model; //model;
         this.graph = graph;
         this.recon = recon;
         this.scripts = new ArrayList<>();
@@ -53,11 +64,18 @@ public class HttpSaver implements Saver
         // TODO:: make model string representation and take checksum.
         modelChecksum = scripts.get(0).checksum;
 
-        RunDto run = new RunDto.Builder(username, model, modelChecksum, graph, recon, scripts)
-                                .setTitle(title)
-                                .setDescription(description)
-                                .setTags(tags)
-                                .build();
+        flattenModel(model);
+
+        RunDto.Builder builder = new RunDto.Builder(username, "", modelChecksum, graph, recon, scripts);
+
+        if(title != null)
+            builder.setTitle(title);
+        if(description != null)
+            builder.setDescription(description);
+        if(!tags.isEmpty())
+            builder.setTags(tags);
+
+        RunDto run = builder.build();
 
         String message = "Succesfully uploaded this run to %s.\nWorkflow ID: %d\nVersion: %d\nRun Number: %d";
         if(workflowId == null) {
@@ -84,6 +102,93 @@ public class HttpSaver implements Saver
         System.out.println(message);
 
         return this;
+    }
+
+    private void flattenModel(Model model)
+    {
+        data.addAll(mapData(model.data));
+        recurseProgramFlatten(model.workflow, null);
+    }
+
+    private void recurseProgramFlatten(Program program, Long parentId)
+    {
+        ProgramBlockDto.Builder programBuilder = new ProgramBlockDto.Builder(program);
+
+        if(parentId != null)
+            programBuilder.setInProgramBlock(parentId);
+
+        programBlocks.add(programBuilder.build());
+        data.addAll(mapData(program.data, program.id));
+        ports.addAll(mapPorts(this::inPortBuilder, program.inPorts, program.id));
+        ports.addAll(mapPorts(this::outPortBuilder, program.outPorts, program.id));
+        channels.addAll(mapChannels(program.channels));
+
+        // program.programs always is at least an array of size 0,
+        // so if no children exist, this acts as the base case
+       for(Program childProgram : program.programs)
+           recurseProgramFlatten(childProgram, program.id);
+    }
+
+    private List<ChannelDto> mapChannels(Channel[] channelArray)
+    {
+        List<ChannelDto> dtos = new ArrayList<>();
+        for(Channel c : channelArray)
+        {
+            ChannelDto channelDto = new ChannelDto(c);
+            channelDto.setInflow(c.sourcePort.flowAnnotation.keyword.toLowerCase().startsWith("@in"));
+            channelDto.setOutlfow(c.sourcePort.flowAnnotation.keyword.toLowerCase().startsWith("@out"));
+            dtos.add(channelDto);
+        }
+        return dtos;
+    }
+
+    private List<PortDto> mapPorts(BiFunction<Port, Long, PortDto.Builder> portBuilderFunc, Port[] portArray, Long programId)
+    {
+        List<PortDto> dtoList = new ArrayList<>();
+        for(Port p : portArray)
+        {
+            PortDto.Builder builder = portBuilderFunc.apply(p, programId);
+
+            String alias = p.flowAnnotation.alias();
+            if(alias != null)
+                builder.setAlias(alias);
+
+            if(p.uriTemplate != null)
+                builder.setUriTemplate(p.uriTemplate.toString());
+
+            dtoList.add(builder.build());
+        }
+        return dtoList;
+    }
+
+    private PortDto.Builder inPortBuilder(Port port, Long programId)
+    {
+        return new PortDto.Builder(port, programId, true, false);
+    }
+
+    private PortDto.Builder outPortBuilder(Port port, Long programId)
+    {
+        return new PortDto.Builder(port, programId, false, true);
+    }
+
+    private List<DataDto> mapData(Data[] dataArray)
+    {
+        return mapData(dataArray, null);
+    }
+
+    private List<DataDto> mapData(Data[] dataArray, Long programId)
+    {
+        List<DataDto> dtoList = new ArrayList<>();
+        for(Data d : dataArray)
+        {
+            DataDto.Builder builder = new DataDto.Builder(d);
+
+            if(programId != null)
+                builder.setInProgramBlock(programId);
+
+            dtoList.add(builder.build());
+        }
+        return dtoList;
     }
 
     public Saver configure(Map<String, Object> config) throws Exception {
@@ -120,7 +225,6 @@ public class HttpSaver implements Saver
             default:
                 break;
         }
-
         return this;
     }
 
