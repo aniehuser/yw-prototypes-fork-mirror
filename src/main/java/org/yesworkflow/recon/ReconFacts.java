@@ -99,6 +99,7 @@ public class ReconFacts {
             for (Resource resource : resources) {
                 buildUriVariableValueFacts(port.uriTemplate, resource);
             }
+            run.resources.addAll(resources);
         }
     }
     
@@ -163,6 +164,7 @@ public class ReconFacts {
             resourceForUri.put(uri, resource);
             resourceFacts.addRow(resource.id, FileIO.normalizePathSeparator(uri));
         }
+        resource.data = data.id;
         dataResourceFacts.addRow(data.id, resource.id);
         return resource;
     }
@@ -171,6 +173,7 @@ public class ReconFacts {
         Map<String,String> variableValues = uriTemplate.extractValuesFromPath(resource.uri);
         for (TemplateVariable variable : uriTemplate.variables) {
             String variableValue = variableValues.get(variable.name);
+            run.uriVariableValues.add(new UriVariableValue(resource.id, variable.id, variableValue));
             uriVariableValueFacts.addRow(resource.id, variable.id, variableValue);
         }
     }

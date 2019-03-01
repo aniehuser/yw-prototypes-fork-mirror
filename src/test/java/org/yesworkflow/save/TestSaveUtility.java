@@ -40,7 +40,7 @@ public class TestSaveUtility extends YesWorkflowTestCase
 
         ArrayList<ScriptDto> s = new ArrayList<>();
         s.add(scriptDto);
-        RunDto testRunDto = new RunDto.Builder("u", "m", "mc", "g", "r", s)
+        RunDto testRunDto = new RunDto.Builder("u", "m", "mc", "g", s)
                                                 .build();
 
         String actual = serializer.Serialize(testRunDto);

@@ -293,6 +293,9 @@ public class YesWorkflowCLI {
                     return ExitCode.SUCCESS;
 
                 case SAVE:
+                    if(config.get("recon.factsfile") == null)
+                        config.set("recon.factsfile", "");
+
                     extract();
                     model();
                     graph();
