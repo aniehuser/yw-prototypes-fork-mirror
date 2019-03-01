@@ -23,7 +23,6 @@ public class HttpSaver implements Saver
     String graph = "";
     Model model = null;
     String modelChecksum = "";
-    String recon = "";
     List<String> tags = null;
     List<ScriptDto> scripts = null;
     List<DataDto> data = null;
@@ -41,11 +40,10 @@ public class HttpSaver implements Saver
         programBlocks = new ArrayList<>();
     }
 
-    public Saver build(Model model, String graph, String recon, List<String> sourceCodeList, List<String> sourcePaths)
+    public Saver build(Model model, String graph, List<String> sourceCodeList, List<String> sourcePaths)
     {
-        this.model = model; //model;
+        this.model = model;
         this.graph = graph;
-        this.recon = recon;
         this.scripts = new ArrayList<>();
         for (int i = 0; i < sourceCodeList.size(); i++)
         {
@@ -66,7 +64,11 @@ public class HttpSaver implements Saver
 
         flattenModel(model);
 
-        RunDto.Builder builder = new RunDto.Builder(username, "", modelChecksum, graph, recon, scripts);
+        RunDto.Builder builder = new RunDto.Builder(username, "", modelChecksum, graph, scripts)
+                                            .setChannels(channels)
+                                            .setData(data)
+                                            .setPorts(ports)
+                                            .setProgramBlocks(programBlocks);
 
         if(title != null)
             builder.setTitle(title);

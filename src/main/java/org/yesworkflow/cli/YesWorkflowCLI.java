@@ -430,9 +430,6 @@ public class YesWorkflowCLI {
                            .annotations(annotations)
                            .model()
                            .getModel();
-        if(true){
-
-        }
     }
 
     private void graph() throws Exception {
@@ -465,12 +462,10 @@ public class YesWorkflowCLI {
             saver = new HttpSaver(new JsonSerializer());
         }
 
-        ywdb.fetchPort();
-
         List<String> sourceCodeList = extractor.getSourceCodeList();
         List<String> sourcePaths = extractor.getSourcePaths();
         saver.configure(config.getSection("save"))
-                .build(model, grapher.toString(), "placeholder recon", sourceCodeList, sourcePaths)
+                .build(model, grapher.toString(), sourceCodeList, sourcePaths)
                 .save();
     }
 }
