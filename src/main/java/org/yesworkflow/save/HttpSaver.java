@@ -37,10 +37,10 @@ public class HttpSaver implements Saver
         this.recon = recon;
         this.scripts = new ArrayList<>();
         try{
-            Hash hash = new Hash("md5");
+            Hash hash = new Hash("SHA-256");
             for (int i = 0; i < sourceCodeList.size(); i++)
             {
-                String checksum = hash.getHash(sourceCodeList.get(i));
+                String checksum = hash.getHash(sourcePaths.get(i));
                 ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
                 scripts.add(scriptDto);
             }
