@@ -45,11 +45,16 @@ public class HttpSaver implements Saver
         this.model = model;
         this.graph = graph;
         this.scripts = new ArrayList<>();
-        for (int i = 0; i < sourceCodeList.size(); i++)
-        {
-            String checksum = Hash.getStringHash(sourceCodeList.get(i));
-            ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
-            scripts.add(scriptDto);
+        try{
+            Hash hash = new Hash("SHA-256");
+            for (int i = 0; i < sourceCodeList.size(); i++)
+            {
+                String checksum = hash.getHash(sourcePaths.get(i));
+                ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
+                scripts.add(scriptDto);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
 
         return this;
