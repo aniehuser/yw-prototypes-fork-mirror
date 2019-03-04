@@ -24,14 +24,20 @@ public class RunDto {
     public List<ScriptDto> scripts;
     @SerializedName("files")
     public List<FileDto> files;
-    @SerializedName("programBlocks")
+    @SerializedName("programBlock")
     public List<ProgramBlockDto> programBlocks;
     @SerializedName("data")
     public List<DataDto> data;
-    @SerializedName("ports")
+    @SerializedName("port")
     public List<PortDto> ports;
-    @SerializedName("channels")
+    @SerializedName("channel")
     public List<ChannelDto> channels;
+    @SerializedName("uriVariable")
+    public List<URIVariableDto> uriVariables;
+    @SerializedName("resource")
+    public List<ResourceDto> resources;
+    @SerializedName("uriVariableValue")
+    public List<URIVariableValueDto> uriVariableValues;
 
     public RunDto(String username,
                   String title,
@@ -45,7 +51,10 @@ public class RunDto {
                   List<ProgramBlockDto> programBlocks,
                   List<DataDto> data,
                   List<PortDto> ports,
-                  List<ChannelDto> channels)
+                  List<ChannelDto> channels,
+                  List<URIVariableDto> uriVariables,
+                  List<ResourceDto> resources,
+                  List<URIVariableValueDto> uriVariableValues)
     {
         this.username = username;
         this.title = title;
@@ -60,6 +69,9 @@ public class RunDto {
         this.data = data;
         this.ports = ports;
         this.channels = channels;
+        this.uriVariables = uriVariables;
+        this.resources = resources;
+        this.uriVariableValues = uriVariableValues;
     }
 
     public static class Builder
@@ -77,6 +89,9 @@ public class RunDto {
         public List<DataDto> data;
         public List<PortDto> ports;
         public List<ChannelDto> channels;
+        public List<URIVariableDto> uriVariables;
+        public List<ResourceDto> resources;
+        public List<URIVariableValueDto> uriVariableValues;
 
         public Builder(String username, String model, String modelChecksum, String graph, List<ScriptDto> scripts)
         {
@@ -132,6 +147,24 @@ public class RunDto {
         public Builder setChannels(List<ChannelDto> channels)
         {
             this.channels = channels;
+            return this;
+        }
+
+        public Builder setURIVariables(List<URIVariableDto> uriVariables)
+        {
+            this.uriVariables = uriVariables;
+            return this;
+        }
+
+        public Builder setResources(List<ResourceDto> resources)
+        {
+            this.resources = resources;
+            return this;
+        }
+
+        public Builder setURIVariableValues(List<URIVariableValueDto> uriVariableValues)
+        {
+            this.uriVariableValues = uriVariableValues;
             return this;
         }
 
