@@ -96,10 +96,22 @@ public class ReconFacts {
     private void buildFactsForPortResources(Port[] ports) throws Exception {
         for (Port port: ports) {
             List<Resource> resources = findResourcesForPort(port);
+            run.resources.addAll(resources);
+            buildUriVariablesForPort(port);
             for (Resource resource : resources) {
                 buildUriVariableValueFacts(port.uriTemplate, resource);
             }
-            run.resources.addAll(resources);
+        }
+    }
+
+    private void buildUriVariablesForPort(Port port)
+    {
+        if(port.uriTemplate == null)
+            return;
+
+        for(TemplateVariable templateVariable : port.uriTemplate.variables)
+        {
+            run.uriVariables.add(new UriVariable(templateVariable.id, port.id, templateVariable.name));
         }
     }
     
@@ -131,7 +143,9 @@ public class ReconFacts {
     }
     
     private void findLogEntries(List<Log> logAnnotations, Resource resource) throws Exception {
-        File logFile = new File(run.runDirectoryBase.toString() + "/" + resource.uri);
+        String uriBase = run.runDirectoryBase.toString();
+        String uriBaseSeperator = uriBase.equals("") ? "" : "/";
+        File logFile = new File(uriBase + uriBaseSeperator + resource.uri);
         FileReader fileReader = new FileReader(logFile);
         BufferedReader br = new BufferedReader(fileReader);
         String entry = null;

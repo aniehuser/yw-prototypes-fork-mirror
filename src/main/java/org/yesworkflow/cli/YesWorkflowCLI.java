@@ -74,6 +74,7 @@ public class YesWorkflowCLI {
     private Grapher grapher = null;
     private List<Annotation> annotations;
     private Model model = null;
+    private Run run = null;
     private YWConfiguration config = null;
     private Reconstructor reconstructor;
     private Saver saver;
@@ -453,7 +454,7 @@ public class YesWorkflowCLI {
         }
 
         String runDirectory = config.getStringValue("recon.rundir");
-        Run run = (runDirectory == null) ? new Run(model) : new Run(model, runDirectory);
+        run = (runDirectory == null) ? new Run(model) : new Run(model, runDirectory);
         
         reconstructor.configure(config.getSection("recon"))
                      .run(run)
@@ -466,7 +467,7 @@ public class YesWorkflowCLI {
         }
 
         saver.configure(config.getSection("save"))
-                .build(model, grapher.toString(), extractor.getSourceCodeList(), extractor.getSourcePaths())
+                .build(run, grapher.toString(), extractor.getSourceCodeList(), extractor.getSourcePaths())
                 .save();
     }
 }

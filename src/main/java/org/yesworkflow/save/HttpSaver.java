@@ -1,6 +1,7 @@
 package org.yesworkflow.save;
 
 import org.yesworkflow.model.*;
+import org.yesworkflow.recon.Run;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
@@ -10,10 +11,12 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+
 
 public class HttpSaver implements Saver
 {
-    IYwSerializer ywSerializer = null;
+    IYwSerializer ywSerializer;
     IClient client = null;
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
@@ -21,14 +24,17 @@ public class HttpSaver implements Saver
     String title = null;
     String description = null;
     String graph = "";
-    Model model = null;
+    Run run = null;
     String modelChecksum = "";
-    List<String> tags = null;
-    List<ScriptDto> scripts = null;
-    List<DataDto> data = null;
-    List<ChannelDto> channels = null;
-    List<PortDto> ports = null;
-    List<ProgramBlockDto> programBlocks = null;
+    List<String> tags;
+    List<ScriptDto> scripts;
+    List<DataDto> data;
+    List<ChannelDto> channels;
+    List<PortDto> ports;
+    List<ProgramBlockDto> programBlocks;
+    List<ResourceDto> resources;
+    List<UriVariableDto> uriVariables;
+    List<UriVariableValueDto> uriVariableValues;
 
     public HttpSaver(IYwSerializer ywSerializer){
         this.ywSerializer = ywSerializer;
@@ -38,11 +44,14 @@ public class HttpSaver implements Saver
         channels = new ArrayList<>();
         ports = new ArrayList<>();
         programBlocks = new ArrayList<>();
+        resources = new ArrayList<>();
+        uriVariables = new ArrayList<>();
+        uriVariableValues = new ArrayList<>();
     }
 
-    public Saver build(Model model, String graph, List<String> sourceCodeList, List<String> sourcePaths)
+    public Saver build(Run run, String graph, List<String> sourceCodeList, List<String> sourcePaths)
     {
-        this.model = model;
+        this.run = run;
         this.graph = graph;
         this.scripts = new ArrayList<>();
         try{
@@ -67,13 +76,19 @@ public class HttpSaver implements Saver
         // TODO:: make model string representation and take checksum.
         modelChecksum = scripts.get(0).checksum;
 
-        flattenModel(model);
+        flattenModel(run.model);
+        resources = mapCustomObjectList(run.resources, ResourceDto::new);
+        uriVariables = mapCustomObjectList(run.uriVariables, UriVariableDto::new);
+        uriVariableValues = mapCustomObjectList(run.uriVariableValues, UriVariableValueDto::new);
 
         RunDto.Builder builder = new RunDto.Builder(username, "", modelChecksum, graph, scripts)
                                             .setChannels(channels)
                                             .setData(data)
                                             .setPorts(ports)
-                                            .setProgramBlocks(programBlocks);
+                                            .setProgramBlocks(programBlocks)
+                                            .setResources(resources)
+                                            .setUriVariables(uriVariables)
+                                            .setUriVariableValues(uriVariableValues);
 
         if(title != null)
             builder.setTitle(title);
@@ -196,6 +211,16 @@ public class HttpSaver implements Saver
             dtoList.add(builder.build());
         }
         return dtoList;
+    }
+
+    private <CustomObj, Obj> List<CustomObj> mapCustomObjectList(List<Obj> objectList, Function<Obj, CustomObj> customMapper)
+    {
+        List<CustomObj> customObjList = new ArrayList<>();
+        for(Obj object : objectList)
+        {
+            customObjList.add(customMapper.apply(object));
+        }
+        return customObjList;
     }
 
     public Saver configure(Map<String, Object> config) throws Exception {
