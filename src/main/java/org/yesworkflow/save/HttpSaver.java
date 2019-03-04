@@ -23,6 +23,7 @@ public class HttpSaver implements Saver
     String graph = "";
     Model model = null;
     String modelChecksum = "";
+    String modelFacts = "";
     List<String> tags = null;
     List<ScriptDto> scripts = null;
     List<DataDto> data = null;
@@ -40,11 +41,13 @@ public class HttpSaver implements Saver
         programBlocks = new ArrayList<>();
     }
 
-    public Saver build(Model model, String graph, List<String> sourceCodeList, List<String> sourcePaths)
+    public Saver build(Model model, String graph, List<String> sourceCodeList, List<String> sourcePaths, String modelFacts)
     {
         this.model = model;
         this.graph = graph;
         this.scripts = new ArrayList<>();
+        this.modelFacts = modelFacts;
+        this.modelChecksum = Integer.toString(modelFacts.hashCode());
         try{
             Hash hash = new Hash("SHA-256");
             for (int i = 0; i < sourceCodeList.size(); i++)

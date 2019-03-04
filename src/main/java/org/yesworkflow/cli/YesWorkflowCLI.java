@@ -464,6 +464,7 @@ public class YesWorkflowCLI {
         if (saver == null) {
             saver = new HttpSaver(new JsonSerializer());
         }
+        String modelFactsString = modeler.getModelStringFacts();
 
         saver.configure(config.getSection("save"))
                 .build(model, grapher.toString(), extractor.getSourceCodeList(), extractor.getSourcePaths())
