@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -185,5 +186,40 @@ public class ReconFacts {
 
     public List<String> getReconFiles() {
         return reconFiles;
+    }
+
+    public List<String> getReconTimestamps(){
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        List<String> reconTimeStamps = new ArrayList<String>();
+        List<String> reconFiles =  getReconFiles();
+
+        for(int i = 0; i < reconFiles.size(); i++){
+            File file = new File(reconFiles.get(i));
+            reconTimeStamps.add(sdf.format(file.lastModified()));
+        }
+        return reconTimeStamps;
+
+    }
+
+    public List<Long> getReconFileSizes(){
+        List<Long> reconFileSizes = new ArrayList<Long>();
+        List<String> reconFiles =  getReconFiles();
+
+        for(int i = 0; i < reconFiles.size(); i++){
+            File file = new File(reconFiles.get(i));
+            reconFileSizes.add(file.length());
+        }
+        return reconFileSizes;
+    }
+
+    public List<String> getReconFileNames(){
+        List<String> fileNames = new ArrayList<String>();
+        List<String> reconFiles =  getReconFiles();
+
+        for(int i = 0; i < reconFiles.size(); i++){
+            File file = new File(reconFiles.get(i));
+            fileNames.add(file.getName());
+        }
+        return fileNames;
     }
 }
