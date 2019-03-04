@@ -1,11 +1,14 @@
 package org.yesworkflow.save;
 
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.model.*;
 import org.yesworkflow.recon.Run;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -16,7 +19,10 @@ import java.util.function.Function;
 
 public class HttpSaver implements Saver
 {
+    private final String hashAlgorithm = "SHA-256";
+
     IYwSerializer ywSerializer;
+    Hash hasher;
     IClient client = null;
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
@@ -36,8 +42,17 @@ public class HttpSaver implements Saver
     List<UriVariableDto> uriVariables;
     List<UriVariableValueDto> uriVariableValues;
 
-    public HttpSaver(IYwSerializer ywSerializer){
+    public HttpSaver(IYwSerializer ywSerializer) throws YwSaveException
+    {
         this.ywSerializer = ywSerializer;
+        try
+        {
+            hasher = new Hash(hashAlgorithm);
+        }
+        catch (NoSuchAlgorithmException e)
+        { // this case should never occur
+            throw new YwSaveException("Invalid internal hashing algorithm " + hashAlgorithm);
+        }
         tags = new ArrayList<>();
         scripts = new ArrayList<>();
         data = new ArrayList<>();
@@ -53,19 +68,7 @@ public class HttpSaver implements Saver
     {
         this.run = run;
         this.graph = graph;
-        this.scripts = new ArrayList<>();
-        try{
-            Hash hash = new Hash("SHA-256");
-            for (int i = 0; i < sourceCodeList.size(); i++)
-            {
-                String checksum = hash.getHash(sourcePaths.get(i));
-                ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
-                scripts.add(scriptDto);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
+        this.scripts = hashAndMapSourcePaths(sourcePaths, sourceCodeList);
         return this;
     }
 
@@ -124,6 +127,24 @@ public class HttpSaver implements Saver
         System.out.println(message);
 
         return this;
+    }
+
+    private List<ScriptDto> hashAndMapSourcePaths(List<String> sourcePaths, List<String> sourceCodeList)
+    {
+        List<ScriptDto> scriptDtoList = new ArrayList<>();
+
+        for (int i = 0; i < sourceCodeList.size(); i++)
+        {
+            try
+            {
+                String checksum = hasher.getHash(sourcePaths.get(i));
+                ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
+                scriptDtoList.add(scriptDto);
+            } catch(IOException e)
+            { // This case should never occur, the values are validated earlier int the program
+            }
+        }
+        return scriptDtoList;
     }
 
     private void flattenModel(Model model)

@@ -13,6 +13,7 @@ import org.yesworkflow.config.YWConfiguration;
 import org.yesworkflow.db.YesWorkflowDB;
 import org.yesworkflow.exceptions.YWMarkupException;
 import org.yesworkflow.exceptions.YWToolUsageException;
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.extract.DefaultExtractor;
 import org.yesworkflow.extract.Extractor;
 import org.yesworkflow.graph.DotGrapher;
@@ -311,7 +312,10 @@ public class YesWorkflowCLI {
         } catch (YWMarkupException e) {
             printMarkupErrors(e.getMessage());
             return ExitCode.MARKUP_ERROR;
-        } 
+        } catch (YwSaveException e) {
+            errStream.println(e.getMessage());
+            return ExitCode.SAVE_ERROR;
+        }
 
         return ExitCode.SUCCESS;
     }
