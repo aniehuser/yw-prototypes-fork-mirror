@@ -5,7 +5,7 @@ import org.yesworkflow.recon.Resource;
 
 public class ResourceDto
 {
-    @SerializedName("id")
+    @SerializedName("resourceId")
     public Integer id;
     @SerializedName("data")
     public Long data;

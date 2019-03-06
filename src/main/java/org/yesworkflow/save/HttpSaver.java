@@ -84,7 +84,7 @@ public class HttpSaver implements Saver
         uriVariables = mapCustomObjectList(run.uriVariables, UriVariableDto::new);
         uriVariableValues = mapCustomObjectList(run.uriVariableValues, UriVariableValueDto::new);
 
-        RunDto.Builder builder = new RunDto.Builder(username, "", modelChecksum, graph, scripts)
+        RunDto.Builder builder = new RunDto.Builder(username, "modelV", modelChecksum, graph, scripts)
                                             .setChannels(channels)
                                             .setData(data)
                                             .setPorts(ports)

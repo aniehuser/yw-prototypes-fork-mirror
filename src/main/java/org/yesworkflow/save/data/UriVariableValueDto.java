@@ -5,14 +5,14 @@ import org.yesworkflow.recon.UriVariableValue;
 
 public class UriVariableValueDto
 {
-    @SerializedName("uriVariable")
-    public Integer uriVariable;
+    @SerializedName("uriVariableId")
+    public Long uriVariable;
     @SerializedName("resource")
-    public Long resource;
+    public Integer resource;
     @SerializedName("value")
     public String value;
 
-    public UriVariableValueDto(Integer uriVariable, Long resource, String value)
+    public UriVariableValueDto(Long uriVariable, Integer resource, String value)
     {
         this.uriVariable = uriVariable;
         this.resource = resource;

@@ -5,7 +5,7 @@ import org.yesworkflow.recon.UriVariable;
 
 public class UriVariableDto
 {
-    @SerializedName("id")
+    @SerializedName("uriVariableId")
     public Long id;
     @SerializedName("port")
     public Integer port;

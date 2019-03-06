@@ -5,7 +5,7 @@ import org.yesworkflow.model.Port;
 
 public class PortDto
 {
-    @SerializedName("id")
+    @SerializedName("portId")
     public Integer id;
     @SerializedName("onProgramBlock")
     public Long onProgramBlock;
@@ -19,9 +19,9 @@ public class PortDto
     public String alias;
     @SerializedName("uriTemplate")
     public String uriTemplate;
-    @SerializedName("isInPort")
+    @SerializedName("inPort")
     public Boolean isInPort;
-    @SerializedName("isOutPort")
+    @SerializedName("outPort")
     public Boolean isOutPort;
 
     public PortDto(Integer id,

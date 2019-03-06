@@ -1,12 +1,11 @@
 package org.yesworkflow.save.data;
 
 import com.google.gson.annotations.SerializedName;
-import com.sun.istack.internal.NotNull;
 import org.yesworkflow.model.Channel;
 
 public class ChannelDto
 {
-    @SerializedName("id")
+    @SerializedName("channelId")
     public Integer id;
     @SerializedName("outPort")
     public Integer outPort;
@@ -28,7 +27,7 @@ public class ChannelDto
         this.isOutlfow = isOutlfow;
     }
 
-    public ChannelDto(@NotNull Channel channel)
+    public ChannelDto(Channel channel)
     {
         this.id = channel.id;
         this.outPort = channel.sourcePort.id;
