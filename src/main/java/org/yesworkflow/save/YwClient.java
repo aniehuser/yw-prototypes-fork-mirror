@@ -1,5 +1,6 @@
 package org.yesworkflow.save;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -15,6 +16,7 @@ import org.yesworkflow.save.response.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 public class YwClient implements IClient {
     private CloseableHttpClient client;
@@ -90,6 +92,7 @@ public class YwClient implements IClient {
             StringEntity json = new StringEntity(serializer.Serialize(Dto));
             json.setContentType("application/json");
             postRequest.setEntity(json);
+            System.out.println(postRequest);
             if(token != null)
                 postRequest.addHeader("Authentication", token);
             response = executeRequest(postRequest, rClass);

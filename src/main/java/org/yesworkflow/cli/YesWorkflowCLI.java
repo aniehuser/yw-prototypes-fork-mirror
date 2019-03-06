@@ -13,6 +13,7 @@ import org.yesworkflow.config.YWConfiguration;
 import org.yesworkflow.db.YesWorkflowDB;
 import org.yesworkflow.exceptions.YWMarkupException;
 import org.yesworkflow.exceptions.YWToolUsageException;
+import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.extract.DefaultExtractor;
 import org.yesworkflow.extract.Extractor;
 import org.yesworkflow.graph.DotGrapher;
@@ -74,6 +75,7 @@ public class YesWorkflowCLI {
     private Grapher grapher = null;
     private List<Annotation> annotations;
     private Model model = null;
+    private Run run = null;
     private YWConfiguration config = null;
     private Reconstructor reconstructor;
     private Saver saver;
@@ -293,6 +295,9 @@ public class YesWorkflowCLI {
                     return ExitCode.SUCCESS;
 
                 case SAVE:
+                    if(config.get("recon.factsfile") == null)
+                        config.set("recon.factsfile", "");
+
                     extract();
                     model();
                     graph();
@@ -307,7 +312,10 @@ public class YesWorkflowCLI {
         } catch (YWMarkupException e) {
             printMarkupErrors(e.getMessage());
             return ExitCode.MARKUP_ERROR;
-        } 
+        } catch (YwSaveException e) {
+            errStream.println(e.getMessage());
+            return ExitCode.SAVE_ERROR;
+        }
 
         return ExitCode.SUCCESS;
     }
@@ -450,7 +458,7 @@ public class YesWorkflowCLI {
         }
 
         String runDirectory = config.getStringValue("recon.rundir");
-        Run run = (runDirectory == null) ? new Run(model) : new Run(model, runDirectory);
+        run = (runDirectory == null) ? new Run(model) : new Run(model, runDirectory);
         
         reconstructor.configure(config.getSection("recon"))
                      .run(run)
@@ -461,10 +469,9 @@ public class YesWorkflowCLI {
         if (saver == null) {
             saver = new HttpSaver(new JsonSerializer());
         }
-        List<String> sourceCodeList = extractor.getSourceCodeList();
-        List<String> sourcePaths = extractor.getSourcePaths();
+
         saver.configure(config.getSection("save"))
-                .build("placeholder model", grapher.toString(), "placeholder recon", sourceCodeList, sourcePaths)
+                .build(run, grapher.toString(), extractor.getSourceCodeList(), extractor.getSourcePaths())
                 .save();
     }
 }
