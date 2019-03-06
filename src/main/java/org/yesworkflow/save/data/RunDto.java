@@ -33,11 +33,11 @@ public class RunDto {
     @SerializedName("channel")
     public List<ChannelDto> channels;
     @SerializedName("uriVariable")
-    public List<URIVariableDto> uriVariables;
+    public List<UriVariableDto> uriVariables;
     @SerializedName("resource")
     public List<ResourceDto> resources;
     @SerializedName("uriVariableValue")
-    public List<URIVariableValueDto> uriVariableValues;
+    public List<UriVariableValueDto> uriVariableValues;
 
     public RunDto(String username,
                   String title,
@@ -52,9 +52,9 @@ public class RunDto {
                   List<DataDto> data,
                   List<PortDto> ports,
                   List<ChannelDto> channels,
-                  List<URIVariableDto> uriVariables,
+                  List<UriVariableDto> uriVariables,
                   List<ResourceDto> resources,
-                  List<URIVariableValueDto> uriVariableValues)
+                  List<UriVariableValueDto> uriVariableValues)
     {
         this.username = username;
         this.title = title;
@@ -89,9 +89,9 @@ public class RunDto {
         public List<DataDto> data;
         public List<PortDto> ports;
         public List<ChannelDto> channels;
-        public List<URIVariableDto> uriVariables;
+        public List<UriVariableDto> uriVariables;
         public List<ResourceDto> resources;
-        public List<URIVariableValueDto> uriVariableValues;
+        public List<UriVariableValueDto> uriVariableValues;
 
         public Builder(String username, String model, String modelChecksum, String graph, List<ScriptDto> scripts)
         {
@@ -150,7 +150,7 @@ public class RunDto {
             return this;
         }
 
-        public Builder setURIVariables(List<URIVariableDto> uriVariables)
+        public Builder setUriVariables(List<UriVariableDto> uriVariables)
         {
             this.uriVariables = uriVariables;
             return this;
@@ -161,8 +161,7 @@ public class RunDto {
             this.resources = resources;
             return this;
         }
-
-        public Builder setURIVariableValues(List<URIVariableValueDto> uriVariableValues)
+        public Builder setUriVariableValues(List<UriVariableValueDto> uriVariableValues)
         {
             this.uriVariableValues = uriVariableValues;
             return this;
@@ -189,5 +188,8 @@ public class RunDto {
         this.data=builder.data;
         this.ports=builder.ports;
         this.channels=builder.channels;
+        this.resources=builder.resources;
+        this.uriVariables=builder.uriVariables;
+        this.uriVariableValues=builder.uriVariableValues;
     }
 }

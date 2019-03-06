@@ -5,7 +5,7 @@ import org.yesworkflow.model.Program;
 
 public class ProgramBlockDto
 {
-    @SerializedName("id")
+    @SerializedName("programBlockId")
     public Long id;
     @SerializedName("inProgramBlock")
     public Long inProgramBlock;

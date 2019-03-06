@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import org.yesworkflow.model.Data;
 
 public class DataDto {
-    @SerializedName("id")
+    @SerializedName("dataId")
     public Long id;
     @SerializedName("inProgramBlock")
     public Long inProgramBlock;

@@ -1,17 +1,23 @@
 package org.yesworkflow.save.data;
-
+import com.google.gson.annotations.SerializedName;
 import org.yesworkflow.model.Channel;
 
 public class ChannelDto
 {
+    @SerializedName("channelId")
     public Integer id;
+    @SerializedName("outPort")
     public Integer outPort;
+    @SerializedName("inPort")
     public Integer inPort;
+    @SerializedName("data")
     public Long data;
+    @SerializedName("isInflow")
     public Boolean isInflow;
-    public Boolean isOutlfow;
+    @SerializedName("isOutflow")
+    public Boolean isOutflow;
 
-    public ChannelDto(Integer id, Integer outPort, Integer inPort, Long data, Boolean isInflow, Boolean isOutlfow) {
+    public ChannelDto(Integer id, Integer outPort, Integer inPort, Long data, Boolean isInflow, Boolean isOutflow) {
         this.id = id;
         this.outPort = outPort;
         this.inPort = inPort;

@@ -13,7 +13,10 @@ import java.util.function.BiFunction;
 
 public class HttpSaver implements Saver
 {
-    IYwSerializer ywSerializer = null;
+    private final String hashAlgorithm = "SHA-256";
+
+    IYwSerializer ywSerializer;
+    Hash hasher;
     IClient client = null;
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
@@ -31,35 +34,33 @@ public class HttpSaver implements Saver
     List<PortDto> ports = null;
     List<ProgramBlockDto> programBlocks = null;
 
-    public HttpSaver(IYwSerializer ywSerializer){
+    public HttpSaver(IYwSerializer ywSerializer) throws YwSaveException
+    {
         this.ywSerializer = ywSerializer;
+        try
+        {
+            hasher = new Hash(hashAlgorithm);
+        }
+        catch (NoSuchAlgorithmException e)
+        { // this case should never occur
+            throw new YwSaveException("Invalid internal hashing algorithm " + hashAlgorithm);
+        }
         tags = new ArrayList<>();
         scripts = new ArrayList<>();
         data = new ArrayList<>();
         channels = new ArrayList<>();
         ports = new ArrayList<>();
         programBlocks = new ArrayList<>();
+        resources = new ArrayList<>();
+        uriVariables = new ArrayList<>();
+        uriVariableValues = new ArrayList<>();
     }
 
-    public Saver build(Model model, String graph, List<String> sourceCodeList, List<String> sourcePaths, String modelFacts)
+    public Saver build(Run run, String graph, List<String> sourceCodeList, List<String> sourcePaths)
     {
-        this.model = model;
+        this.run = run;
         this.graph = graph;
-        this.scripts = new ArrayList<>();
-        this.modelFacts = modelFacts;
-        this.modelChecksum = Integer.toString(modelFacts.hashCode());
-        try{
-            Hash hash = new Hash("SHA-256");
-            for (int i = 0; i < sourceCodeList.size(); i++)
-            {
-                String checksum = hash.getHash(sourcePaths.get(i));
-                ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
-                scripts.add(scriptDto);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
+        this.scripts = hashAndMapSourcePaths(sourcePaths, sourceCodeList);
         return this;
     }
 
@@ -69,14 +70,19 @@ public class HttpSaver implements Saver
 
         // TODO:: make model string representation and take checksum.
         modelChecksum = scripts.get(0).checksum;
+        flattenModel(run.model);
+        resources = mapCustomObjectList(run.resources, ResourceDto::new);
+        uriVariables = mapCustomObjectList(run.uriVariables, UriVariableDto::new);
+        uriVariableValues = mapCustomObjectList(run.uriVariableValues, UriVariableValueDto::new);
 
-        flattenModel(model);
-
-        RunDto.Builder builder = new RunDto.Builder(username, "", modelChecksum, graph, scripts)
+        RunDto.Builder builder = new RunDto.Builder(username, "modelV", modelChecksum, graph, scripts)
                                             .setChannels(channels)
                                             .setData(data)
                                             .setPorts(ports)
-                                            .setProgramBlocks(programBlocks);
+                                            .setProgramBlocks(programBlocks)
+                                            .setResources(resources)
+                                            .setUriVariables(uriVariables)
+                                            .setUriVariableValues(uriVariableValues);
 
         if(title != null)
             builder.setTitle(title);
@@ -113,7 +119,23 @@ public class HttpSaver implements Saver
 
         return this;
     }
+    private List<ScriptDto> hashAndMapSourcePaths(List<String> sourcePaths, List<String> sourceCodeList)
+    {
+        List<ScriptDto> scriptDtoList = new ArrayList<>();
 
+        for (int i = 0; i < sourceCodeList.size(); i++)
+        {
+            try
+            {
+                String checksum = hasher.getHash(sourcePaths.get(i));
+                ScriptDto scriptDto = new ScriptDto(sourcePaths.get(i), sourceCodeList.get(i), checksum);
+                scriptDtoList.add(scriptDto);
+            } catch(IOException e)
+            { // This case should never occur, the values are validated earlier int the program
+            }
+        }
+        return scriptDtoList;
+    }
     private void flattenModel(Model model)
     {
         data.addAll(mapData(model.data));
@@ -199,6 +221,16 @@ public class HttpSaver implements Saver
             dtoList.add(builder.build());
         }
         return dtoList;
+    }
+
+    private <CustomObj, Obj> List<CustomObj> mapCustomObjectList(List<Obj> objectList, Function<Obj, CustomObj> customMapper)
+    {
+        List<CustomObj> customObjList = new ArrayList<>();
+        for(Obj object : objectList)
+        {
+            customObjList.add(customMapper.apply(object));
+        }
+        return customObjList;
     }
 
     public Saver configure(Map<String, Object> config) throws Exception {
