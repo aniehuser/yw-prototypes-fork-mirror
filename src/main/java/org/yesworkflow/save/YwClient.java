@@ -91,7 +91,7 @@ public class YwClient implements IClient {
             json.setContentType("application/json");
             postRequest.setEntity(json);
             if(token != null)
-                postRequest.addHeader("Authentication", token);
+                postRequest.addHeader("Authentication", "Token " + token);
             response = executeRequest(postRequest, rClass);
         } catch (UnsupportedEncodingException e)
         {

@@ -293,11 +293,12 @@ public class YesWorkflowCLI {
                     return ExitCode.SUCCESS;
 
                 case SAVE:
+                    beforeRunSave();
                     extract();
                     model();
                     graph();
                     recon();
-                    save();
+                    afterRunSave();
                     return ExitCode.SUCCESS;
             }
             
@@ -457,14 +458,32 @@ public class YesWorkflowCLI {
                      .recon();
     }
 
-    private void save() throws Exception {
+    private void beforeRunSave() throws Exception
+    {
         if (saver == null) {
-            saver = new HttpSaver(new JsonSerializer());
+            saver = new HttpSaver(new JsonSerializer(), this.outStream, this.errStream);
         }
+
+        // A non null factsfile must be specified to gather recon facts.
+        if (config.get("recon.factsfile") == null) {
+            config.set("recon.factsfile", "");
+        }
+
+        saver.configure(config.getSection("save"))
+                .login();
+
+    }
+
+    private void afterRunSave() throws Exception
+    {
+        if (saver == null) {
+            saver = new HttpSaver(new JsonSerializer(), this.outStream, this.errStream);
+        }
+
         List<String> sourceCodeList = extractor.getSourceCodeList();
         List<String> sourcePaths = extractor.getSourcePaths();
-        saver.configure(config.getSection("save"))
-                .build("placeholder model", grapher.toString(), "placeholder recon", sourceCodeList, sourcePaths)
+        saver.build("placeholder model", grapher.toString(), "placeholder recon", sourceCodeList, sourcePaths)
                 .save();
+
     }
 }
