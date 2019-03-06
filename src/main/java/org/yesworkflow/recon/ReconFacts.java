@@ -38,8 +38,6 @@ public class ReconFacts {
     private DataExportBuilder uriVariableValueFacts;
     private DataExportBuilder logVariableValueFacts;
 
-    private Map<String,Resource> resourceForUri = new HashMap<String,Resource>();
-
     private ResourceFinder resourceFinder;
     
     public ReconFacts(QueryEngine queryEngine, Run run, ResourceFinder resourceFinder) throws IOException {
@@ -172,12 +170,8 @@ public class ReconFacts {
     }
     
     private Resource addResource(Data data, String uri) throws IOException {
-//        Resource resource = resourceForUri.get(uri);
-//        if (resource == null) {
         Resource resource = new Resource(nextResourceId++, uri.toString());
-        resourceForUri.put(uri, resource);
         resourceFacts.addRow(resource.id, FileIO.normalizePathSeparator(uri));
-//        }
         resource.data = data.id;
         dataResourceFacts.addRow(data.id, resource.id);
         return resource;
