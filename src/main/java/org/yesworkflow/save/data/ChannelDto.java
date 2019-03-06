@@ -16,15 +16,15 @@ public class ChannelDto
     @SerializedName("isInflow")
     public Boolean isInflow;
     @SerializedName("isOutflow")
-    public Boolean isOutlfow;
+    public Boolean isOutfow;
 
-    public ChannelDto(Integer id, Integer outPort, Integer inPort, Long data, Boolean isInflow, Boolean isOutlfow) {
+    public ChannelDto(Integer id, Integer outPort, Integer inPort, Long data, Boolean isInflow, Boolean isOutfow) {
         this.id = id;
         this.outPort = outPort;
         this.inPort = inPort;
         this.data = data;
         this.isInflow = isInflow;
-        this.isOutlfow = isOutlfow;
+        this.isOutfow = isOutfow;
     }
 
     public ChannelDto(Channel channel)
@@ -43,7 +43,7 @@ public class ChannelDto
 
     public ChannelDto setOutlfow(Boolean outflow)
     {
-        isOutlfow = outflow;
+        isOutfow = outflow;
         return this;
     }
 }
