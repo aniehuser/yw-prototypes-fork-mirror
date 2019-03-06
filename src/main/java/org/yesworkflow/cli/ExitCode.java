@@ -5,7 +5,8 @@ public enum ExitCode {
     SUCCESS          (0),
     UNCAUGHT_ERROR  (-1),
     CLI_USAGE_ERROR (-2),
-    MARKUP_ERROR    (-3);
+    MARKUP_ERROR    (-3),
+    SAVE_ERROR      (-4);
     
     private int value;
     private ExitCode(int value) { this.value = value; }

@@ -38,8 +38,6 @@ public class ReconFacts {
     private DataExportBuilder uriVariableValueFacts;
     private DataExportBuilder logVariableValueFacts;
 
-    private Map<String,Resource> resourceForUri = new HashMap<String,Resource>();
-
     private ResourceFinder resourceFinder;
     
     public ReconFacts(QueryEngine queryEngine, Run run, ResourceFinder resourceFinder) throws IOException {
@@ -96,9 +94,22 @@ public class ReconFacts {
     private void buildFactsForPortResources(Port[] ports) throws Exception {
         for (Port port: ports) {
             List<Resource> resources = findResourcesForPort(port);
+            run.resources.addAll(resources);
+            buildUriVariablesForPort(port);
             for (Resource resource : resources) {
                 buildUriVariableValueFacts(port.uriTemplate, resource);
             }
+        }
+    }
+
+    private void buildUriVariablesForPort(Port port)
+    {
+        if(port.uriTemplate == null)
+            return;
+
+        for(TemplateVariable templateVariable : port.uriTemplate.variables)
+        {
+            run.uriVariables.add(new UriVariable(templateVariable.id, port.id, templateVariable.name));
         }
     }
     
@@ -130,7 +141,9 @@ public class ReconFacts {
     }
     
     private void findLogEntries(List<Log> logAnnotations, Resource resource) throws Exception {
-        File logFile = new File(run.runDirectoryBase.toString() + "/" + resource.uri);
+        String uriBase = run.runDirectoryBase.toString();
+        String uriBaseSeperator = uriBase.equals("") ? "" : "/";
+        File logFile = new File(uriBase + uriBaseSeperator + resource.uri);
         FileReader fileReader = new FileReader(logFile);
         BufferedReader br = new BufferedReader(fileReader);
         String entry = null;
@@ -157,12 +170,9 @@ public class ReconFacts {
     }
     
     private Resource addResource(Data data, String uri) throws IOException {
-        Resource resource = resourceForUri.get(uri);
-        if (resource == null) {
-            resource = new Resource(nextResourceId++, uri.toString());
-            resourceForUri.put(uri, resource);
-            resourceFacts.addRow(resource.id, FileIO.normalizePathSeparator(uri));
-        }
+        Resource resource = new Resource(nextResourceId++, uri.toString());
+        resourceFacts.addRow(resource.id, FileIO.normalizePathSeparator(uri));
+        resource.data = data.id;
         dataResourceFacts.addRow(data.id, resource.id);
         return resource;
     }
@@ -171,6 +181,7 @@ public class ReconFacts {
         Map<String,String> variableValues = uriTemplate.extractValuesFromPath(resource.uri);
         for (TemplateVariable variable : uriTemplate.variables) {
             String variableValue = variableValues.get(variable.name);
+            run.uriVariableValues.add(new UriVariableValue(variable.id, resource.id, variableValue));
             uriVariableValueFacts.addRow(resource.id, variable.id, variableValue);
         }
     }

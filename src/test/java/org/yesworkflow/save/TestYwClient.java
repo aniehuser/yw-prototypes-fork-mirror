@@ -77,7 +77,7 @@ public class TestYwClient
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
         scripts.add(scriptDto);
-        RunDto run = new RunDto.Builder(username, "model", "check", "graph", "recon", scripts)
+        RunDto run = new RunDto.Builder(username, "model", "check", "graph", scripts)
                                 .build();
         SaveResponse response = client.SaveRun(run);
         assertTrue(response.ResponseBody, response.OK);
@@ -145,7 +145,7 @@ public class TestYwClient
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
         scripts.add(scriptDto);
-        RunDto run = new RunDto.Builder(username, "model", "check", "graph", "recon", scripts)
+        RunDto run = new RunDto.Builder(username, "model", "check", "graph", scripts)
                 .build();
 
         SaveResponse saveResponse = client.SaveRun(run);
@@ -173,7 +173,7 @@ public class TestYwClient
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
         scripts.add(scriptDto);
-        RunDto run = new RunDto.Builder(username, "model", "check", "graph", "recon", scripts)
+        RunDto run = new RunDto.Builder(username, "model", "check", "graph", scripts)
                 .build();
 
         client.SaveRun(run);
