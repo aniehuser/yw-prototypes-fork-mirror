@@ -18,6 +18,12 @@ public class LoginDto
         this.password = password;
     }
 
+    public LoginDto(String username, String password)
+    {
+        this(username, null, password);
+    }
+
+
     public LoginDto(Builder builder)
     {
         this.username = builder.username;

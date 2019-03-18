@@ -4,35 +4,38 @@ import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.model.*;
 import org.yesworkflow.recon.Run;
 import org.yesworkflow.save.data.*;
-import org.yesworkflow.save.response.LoginResponse;
-import org.yesworkflow.save.response.PingResponse;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
 public class HttpSaver implements Saver
 {
-    private final String hashAlgorithm = "SHA-256";
+    private final String HASH_ALGOTRITHM = "SHA-256";
+    private final int MAX_LOGIN_RETRIES = 2;
 
     IYwSerializer ywSerializer;
+    Authenticator authenticator;
     Hash hasher;
     PrintStream out = null;
-    PrintStream err = null;
+    PrintStream errStream = null;
+    Scanner inStream;
     IClient client = null;
-    Integer loginRetries = 3;
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
     String username = null;
     String title = null;
     String description = null;
     String graph = "";
+
     Run run = null;
     String modelChecksum = "";
     List<String> tags;
@@ -45,20 +48,22 @@ public class HttpSaver implements Saver
     List<UriVariableDto> uriVariables;
     List<UriVariableValueDto> uriVariableValues;
 
-    public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream err) throws Exception
+    public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception
     {
         try
         {
-            hasher = new Hash(hashAlgorithm);
+            hasher = new Hash(HASH_ALGOTRITHM);
         }
         catch (NoSuchAlgorithmException e)
         { // this case should never occur
-            throw new YwSaveException("Invalid internal hashing algorithm " + hashAlgorithm);
+            throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGOTRITHM);
         }
         this.out = out;
-        this.err = err;
+        this.errStream = errStream;
+        this.inStream = new Scanner(inSource);
         this.ywSerializer = ywSerializer;
-        client = new YwClient(baseUrl, ywSerializer);
+        this.client = new YwClient(baseUrl, ywSerializer);
+        this.authenticator = new Authenticator(client, out, inStream);
         tags = new ArrayList<>();
         scripts = new ArrayList<>();
         data = new ArrayList<>();
@@ -259,53 +264,22 @@ public class HttpSaver implements Saver
 
     public Saver login() throws Exception
     {
-        try {
-            client.Ping();
-        } catch(YwSaveException e)
+        if(!authenticator.CheckConnection())
+            throw new YwSaveException("Failed to connect to " + baseUrl);
+
+        authenticator.PrintAuthMessage(baseUrl);
+
+        int attempts = 0;
+        while(canRetry(attempts) && !authenticator.TryLogin(username))
         {
-            throw new YwSaveException("Error connecting to server " + baseUrl + ":\n\t" + e.getMessage());
+            authenticator.PrintRetryMessage();
+            attempts += 1;
         }
 
-        out.println("Enter credentials for " + baseUrl);
-        LoginResponse loginResponse = null;
-        for(int i=0; i<loginRetries; i++)
-        {
-            loginResponse = tryLogin(username);
-            if(loginResponse != null)
-                break;
-            out.println("Incorrect username password combination.");
-        }
-
-        if(loginResponse == null)
-            throw new YwSaveException("");
+        if(!authenticator.IsLoggedIn())
+            throw new YwSaveException("Too many incorrect username password combinations.");
 
         return this;
-    }
-
-    private LoginResponse tryLogin(String username)
-    {
-        LoginResponse loginResponse = null;
-        try(Scanner scanner = new Scanner(System.in))
-        {
-            if(username == null)
-            {
-                out.print("Username: ");
-                username = scanner.nextLine();
-            }
-            else
-            {
-                out.println("Enter password for " + username + ".");
-            }
-
-            out.print("Password: ");
-            String password = scanner.nextLine();
-            LoginDto loginDto = new LoginDto.Builder(username, password)
-                                            .build();
-            loginResponse = client.Login(loginDto);
-        } catch(YwSaveException e)
-        { // We want to suppress this error and continue execution of the program
-        }
-        return loginResponse;
     }
 
     public Saver configure(String key, Object value) throws Exception {
@@ -334,6 +308,11 @@ public class HttpSaver implements Saver
                 break;
         }
         return this;
+    }
+
+    private boolean canRetry(int attempts)
+    {
+        return attempts <= MAX_LOGIN_RETRIES;
     }
 
     private String formatUrl(String url)
