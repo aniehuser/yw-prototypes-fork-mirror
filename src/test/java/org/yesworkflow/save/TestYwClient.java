@@ -64,8 +64,6 @@ public class TestYwClient
     {
         PingResponse response = client.Ping();
         assertTrue(response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals(TestData.pingResponseBody, response.ResponseBody);
     }
 
     @Test
@@ -82,8 +80,6 @@ public class TestYwClient
                                 .build();
         SaveResponse response = client.SaveRun(run);
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
     }
 
     @Test
@@ -93,8 +89,6 @@ public class TestYwClient
                                                     .build();
         RegisterResponse response = client.CreateUser(registerDto);
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
     }
 
     @Test
@@ -107,9 +101,6 @@ public class TestYwClient
                                             .build();
         LoginResponse response = client.Login(loginDto);
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
-
     }
 
     @Test
@@ -121,8 +112,6 @@ public class TestYwClient
 
         LogoutResponse response = client.Logout();
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
     }
 
     @Test

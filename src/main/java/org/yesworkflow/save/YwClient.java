@@ -92,7 +92,6 @@ public class YwClient implements IClient {
             StringEntity json = new StringEntity(serializer.Serialize(Dto));
             json.setContentType("application/json");
             postRequest.setEntity(json);
-            System.out.println(postRequest);
             if(token != null)
                 postRequest.addHeader("Authorization", "Token " + token);
             response = executeRequest(postRequest, rClass);

@@ -50,6 +50,7 @@ public class HttpSaver implements Saver
 
     public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception
     {
+        if(inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
         try
         {
             hasher = new Hash(HASH_ALGOTRITHM);
@@ -80,6 +81,28 @@ public class HttpSaver implements Saver
         this.run = run;
         this.graph = graph;
         this.scripts = hashAndMapSourcePaths(sourcePaths, sourceCodeList);
+        return this;
+    }
+
+    public Saver login() throws Exception
+    {
+        if(!authenticator.CheckConnection())
+            throw new YwSaveException("Failed to connect to " + baseUrl);
+
+        authenticator.PrintAuthMessage(baseUrl);
+        if(username != null)
+            authenticator.PrintPasswordForUsername(username);
+
+        int attempts = 0;
+        while(canRetry(attempts) && !authenticator.TryLogin(username))
+        {
+            authenticator.PrintRetryMessage();
+            attempts += 1;
+        }
+
+        if(!authenticator.IsLoggedIn())
+            throw new YwSaveException("Too many incorrect username password combinations.");
+
         return this;
     }
 
@@ -133,7 +156,7 @@ public class HttpSaver implements Saver
                 message = message + newVersionMessage;
         }
 
-        System.out.println(message);
+        out.println(message);
 
         return this;
     }
@@ -259,26 +282,6 @@ public class HttpSaver implements Saver
                 configure(entry.getKey(), entry.getValue());
             }
         }
-        return this;
-    }
-
-    public Saver login() throws Exception
-    {
-        if(!authenticator.CheckConnection())
-            throw new YwSaveException("Failed to connect to " + baseUrl);
-
-        authenticator.PrintAuthMessage(baseUrl);
-
-        int attempts = 0;
-        while(canRetry(attempts) && !authenticator.TryLogin(username))
-        {
-            authenticator.PrintRetryMessage();
-            attempts += 1;
-        }
-
-        if(!authenticator.IsLoggedIn())
-            throw new YwSaveException("Too many incorrect username password combinations.");
-
         return this;
     }
 

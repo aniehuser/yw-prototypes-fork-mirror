@@ -11,6 +11,7 @@ public class Authenticator
 {
     private final String AUTH_MESSAGE = "Enter your credentials for %s";
     private final String RETRY_MESSAGE = "Invalid username password combination, try again.";
+    private final String PASSWORD_FOR_USERNAME_MESSAGE = "Entering password for user %s.";
 
     private IClient client;
     private PrintStream outStream;
@@ -66,6 +67,11 @@ public class Authenticator
     public void PrintAuthMessage(String webAddress)
     {
         outStream.println(String.format(AUTH_MESSAGE, webAddress));
+    }
+
+    public void PrintPasswordForUsername(String username)
+    {
+        outStream.println(String.format(PASSWORD_FOR_USERNAME_MESSAGE, username));
     }
 
     public String GetUsername()
