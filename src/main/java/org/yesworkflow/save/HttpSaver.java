@@ -8,10 +8,10 @@ import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -19,10 +19,15 @@ import java.util.function.Function;
 
 public class HttpSaver implements Saver
 {
-    private final String hashAlgorithm = "SHA-256";
+    private final String HASH_ALGORITHM = "SHA-256";
+    private final int MAX_LOGIN_RETRIES = 2;
 
-    IYwSerializer ywSerializer;
-    Hash hasher;
+    IYwSerializer ywSerializer = null;
+    Authenticator authenticator = null;
+    Hash hasher = null;
+    PrintStream out = null;
+    PrintStream errStream = null;
+    Scanner inStream = null;
     IClient client = null;
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
@@ -30,29 +35,36 @@ public class HttpSaver implements Saver
     String title = null;
     String description = null;
     String graph = "";
+
     Run run = null;
     String modelChecksum = "";
-    List<String> tags;
-    List<ScriptDto> scripts;
-    List<DataDto> data;
-    List<ChannelDto> channels;
-    List<PortDto> ports;
-    List<ProgramBlockDto> programBlocks;
-    List<ResourceDto> resources;
-    List<UriVariableDto> uriVariables;
-    List<UriVariableValueDto> uriVariableValues;
+    List<String> tags = null;
+    List<ScriptDto> scripts = null;
+    List<DataDto> data = null;
+    List<ChannelDto> channels = null;
+    List<PortDto> ports = null;
+    List<ProgramBlockDto> programBlocks = null;
+    List<ResourceDto> resources = null;
+    List<UriVariableDto> uriVariables = null;
+    List<UriVariableValueDto> uriVariableValues = null;
 
-    public HttpSaver(IYwSerializer ywSerializer) throws YwSaveException
+    public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception
     {
-        this.ywSerializer = ywSerializer;
+        if(inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
         try
         {
-            hasher = new Hash(hashAlgorithm);
+            hasher = new Hash(HASH_ALGORITHM);
         }
         catch (NoSuchAlgorithmException e)
         { // this case should never occur
-            throw new YwSaveException("Invalid internal hashing algorithm " + hashAlgorithm);
+            throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGORITHM);
         }
+        this.out = out;
+        this.errStream = errStream;
+        this.inStream = new Scanner(inSource);
+        this.ywSerializer = ywSerializer;
+        this.client = new YwClient(baseUrl, ywSerializer);
+        this.authenticator = new Authenticator(client, out, inStream);
         tags = new ArrayList<>();
         scripts = new ArrayList<>();
         data = new ArrayList<>();
@@ -72,10 +84,30 @@ public class HttpSaver implements Saver
         return this;
     }
 
+    public Saver login() throws Exception
+    {
+        if(!authenticator.CheckConnection())
+            throw new YwSaveException("Failed to connect to " + baseUrl);
+
+        authenticator.PrintAuthMessage(baseUrl);
+        if(username != null)
+            authenticator.PrintPasswordForUsername(username);
+
+        int attempts = 0;
+        while(canRetry(attempts) && !authenticator.TryLogin(username))
+        {
+            authenticator.PrintRetryMessage();
+            attempts += 1;
+        }
+
+        if(!authenticator.IsLoggedIn())
+            throw new YwSaveException("Too many incorrect username password combinations.");
+
+        return this;
+    }
+
     public Saver save() throws Exception
     {
-        client = new YwClient(baseUrl, ywSerializer);
-
         // TODO:: make model string representation and take checksum.
         modelChecksum = scripts.get(0).checksum;
 
@@ -123,9 +155,7 @@ public class HttpSaver implements Saver
             if(response.ResponseObject.newVersion)
                 message = message + newVersionMessage;
         }
-
-        System.out.println(message);
-
+        out.println(message);
         return this;
     }
 
@@ -279,6 +309,11 @@ public class HttpSaver implements Saver
                 break;
         }
         return this;
+    }
+
+    private boolean canRetry(int attempts)
+    {
+        return attempts <= MAX_LOGIN_RETRIES;
     }
 
     private String formatUrl(String url)

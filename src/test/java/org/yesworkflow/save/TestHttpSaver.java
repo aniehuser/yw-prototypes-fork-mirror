@@ -14,6 +14,7 @@ import org.yesworkflow.model.Modeler;
 import org.yesworkflow.recon.DefaultReconstructor;
 import org.yesworkflow.recon.Reconstructor;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
@@ -42,7 +43,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     public void testSaver_TagParse() throws Exception
     {
         IYwSerializer serializer = new JsonSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
+        HttpSaver saver = new HttpSaver(serializer, null, null, mock(InputStream.class));
         saver.configure("tags", "a, b, c, d, e");
         ArrayList<String> x = new ArrayList<String>();
         x.add("a");
@@ -57,7 +58,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     public void testSaver_WorkflowParse() throws Exception
     {
         IYwSerializer serializer = new JsonSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
+        HttpSaver saver = new HttpSaver(serializer, null, null, mock(InputStream.class));
         Integer expected = 1;
 
         saver.configure("workflow", "1");
@@ -68,7 +69,7 @@ public class TestHttpSaver extends YesWorkflowTestCase
     public void testSaver_FormatUrl() throws Exception
     {
         IYwSerializer serializer = new JsonSerializer();
-        HttpSaver saver = new HttpSaver(serializer);
+        HttpSaver saver = new HttpSaver(serializer, null, null, mock(InputStream.class));
 
         String[][] testData = new String[][]{
                 {"url", "http://url/"},

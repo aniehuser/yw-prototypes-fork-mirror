@@ -5,9 +5,11 @@ import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
@@ -18,6 +20,8 @@ public class TestYwClient
 {
     private String connection;
     private IClient client;
+    private Scanner inStream;
+    private Utility utility;
 
     @BeforeClass
     public static void checkServer()
@@ -40,11 +44,13 @@ public class TestYwClient
     @Before
     public void setUp() throws Exception
     {
+        utility = new Utility();
         connection = String.format("http://%s:%d/",
                                    TestData.testingurl,
                                    TestData.testingport);
-        IYwSerializer serializer = new JsonSerializer();
+        IYwSerializer serializer = utility.GetSerializer();
         client = new YwClient(connection, serializer);
+        inStream = new Scanner(System.in);
     }
 
     @After
@@ -58,21 +64,14 @@ public class TestYwClient
     {
         PingResponse response = client.Ping();
         assertTrue(response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals(TestData.pingResponseBody, response.ResponseBody);
     }
 
     @Test
     public void testYwClient_Save() throws YwSaveException
     {
-        String username = UUID.randomUUID().toString();
-        String password = "Passoword!@#";
-
-        RegisterDto registerDto = new RegisterDto.Builder(username, password).build();
-        LoginDto loginDto = new LoginDto.Builder(username, password).build();
-
-        client.CreateUser(registerDto);
-        client.Login(loginDto);
+        IClient client = utility.GetNewClient();
+        String username = utility.CreateNewUser();
+        utility.LoginUser(client, username);
 
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
@@ -81,8 +80,6 @@ public class TestYwClient
                                 .build();
         SaveResponse response = client.SaveRun(run);
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
     }
 
     @Test
@@ -92,55 +89,37 @@ public class TestYwClient
                                                     .build();
         RegisterResponse response = client.CreateUser(registerDto);
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
     }
 
     @Test
     public void testYwClient_Login() throws YwSaveException
     {
-        RegisterDto registerDto = new RegisterDto.Builder(UUID.randomUUID().toString(), "Password!@#")
-                .build();
-        client.CreateUser(registerDto);
+        String username = utility.CreateNewUser();
+        String password = utility.GetPassword(username);
 
-        LoginDto loginDto = new LoginDto.Builder(registerDto.username, registerDto.password1)
+        LoginDto loginDto = new LoginDto.Builder(username, password)
                                             .build();
         LoginResponse response = client.Login(loginDto);
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
-
     }
 
     @Test
     public void testYwClient_Logout() throws YwSaveException
     {
-        RegisterDto registerDto = new RegisterDto.Builder(UUID.randomUUID().toString(), "Password!@#")
-                .build();
-        client.CreateUser(registerDto);
-
-        LoginDto loginDto = new LoginDto.Builder(registerDto.username, registerDto.password1)
-                .build();
-        client.Login(loginDto);
+        String username = utility.CreateNewUser();
+        IClient client = utility.GetNewClient();
+        utility.LoginUser(client, username);
 
         LogoutResponse response = client.Logout();
-
         assertTrue(response.ResponseBody, response.OK);
-        // TODO:: verify response body once that stops changing
-        // assertEquals();
     }
 
     @Test
     public void testYwClient_UpdateWorkflow() throws YwSaveException
     {
-        String username = UUID.randomUUID().toString();
-        String password = "Passoword!@#";
-
-        RegisterDto registerDto = new RegisterDto.Builder(username, password).build();
-        LoginDto loginDto = new LoginDto.Builder(username, password).build();
-
-        client.CreateUser(registerDto);
-        client.Login(loginDto);
+        IClient client = utility.GetNewClient();
+        String username = utility.CreateNewUser();
+        utility.LoginUser(client, username);
 
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
@@ -205,4 +184,109 @@ public class TestYwClient
 //        UpdateResponse updateResponse = client.UpdateWorkflow(saveResponse.ResponseObject.workflowId, badRun);
 //        int x = 5;
 //    }
+
+    @Test
+    public void TestAuthenticator_GetPassword()
+    {
+        String expectedOutput = "password";
+
+        ByteArrayInputStream in = new ByteArrayInputStream(expectedOutput.getBytes());
+        Scanner scanner = new Scanner(in);
+
+        Authenticator authenticator = new Authenticator(null, utility.GetOutStream(), scanner);
+        String actualOutput = authenticator.GetPassword();
+        assertEquals("Authenticator method did not return the right user input", expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void TestAuthenticator_GetUsername()
+    {
+        String expectedOutput = "username";
+
+        ByteArrayInputStream in = new ByteArrayInputStream(expectedOutput.getBytes());
+        Scanner scanner = new Scanner(in);
+
+        Authenticator authenticator = new Authenticator(null, utility.GetOutStream(), scanner);
+        String actualOutput = authenticator.GetUsername();
+        assertEquals("Authenticator method did not return the right user input", expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void TestAuthenticator_CheckConnectionGood()
+    {
+        Authenticator authenticator = new Authenticator(client, null, null);
+        boolean connection = authenticator.CheckConnection();
+        assertTrue("Authenticator returned false on a valid connection", connection);
+    }
+
+    @Test
+    public void TestAuthenticator_CheckConnectionBad()
+    {
+        String badConnectionString = "https://www.google.com";
+        IYwSerializer serializer = new JsonSerializer();
+        IClient badConnectionClient = new YwClient(badConnectionString, serializer);
+        Authenticator authenticator = new Authenticator(badConnectionClient, null, null);
+        boolean connection = authenticator.CheckConnection();
+        assertFalse("Authenticator returned true on an invalid connection to " + badConnectionString, connection);
+    }
+
+    @Test
+    public void TestAuthenticator_TryLoginNullUsernameGoodCombo() throws YwSaveException
+    {
+        String username = utility.CreateNewUser();
+        String password = utility.GetPassword(username);
+
+        String simulatedUserInput = username + utility.LineSeparator() +
+                                    password + utility.LineSeparator();
+        ByteArrayInputStream in = new ByteArrayInputStream(simulatedUserInput.getBytes());
+        Scanner scanner = new Scanner(in);
+
+        Authenticator authenticator = new Authenticator(utility.GetNewClient(), utility.GetOutStream(), scanner);
+        boolean result = authenticator.TryLogin(null);
+        assertTrue("Failed to authenticate for username: " + username + " and password: " + password, result);
+    }
+
+    @Test
+    public void TestAuthenticator_TryLoginNullUsernameBadCombo() throws YwSaveException
+    {
+        String username = utility.CreateNewUser();
+        String badpassword = utility.GetTestPassword() + "!@#$%";
+
+        String simulatedUserInput = username + utility.LineSeparator() +
+                                    badpassword + utility.LineSeparator();
+        ByteArrayInputStream in = new ByteArrayInputStream(simulatedUserInput.getBytes());
+        Scanner scanner = new Scanner(in);
+
+        Authenticator authenticator = new Authenticator(utility.GetNewClient(), utility.GetOutStream(), scanner);
+        boolean result = authenticator.TryLogin(null);
+        assertFalse("Returned true for bad user pass combo", result);
+    }
+
+    @Test
+    public void TestAuthenticator_TryLoginGoodCombo() throws YwSaveException
+    {
+        String username = utility.CreateNewUser();
+        String password = utility.GetPassword(username);
+        String simulatedUserInput = password + utility.LineSeparator();
+        ByteArrayInputStream in = new ByteArrayInputStream(simulatedUserInput.getBytes());
+        Scanner scanner = new Scanner(in);
+
+        Authenticator authenticator = new Authenticator(utility.GetNewClient(), utility.GetOutStream(), scanner);
+        boolean result = authenticator.TryLogin(username);
+        assertTrue("Failed to authenticate for username " + username + " and password " + password, result);
+    }
+
+    @Test
+    public void TestAuthenticator_TryLoginBadCombo() throws YwSaveException
+    {
+        String username = utility.CreateNewUser();
+        String badpassword = utility.GetTestPassword() + "!@#$";
+        String simulatedUserInput = badpassword + utility.LineSeparator();
+        ByteArrayInputStream in = new ByteArrayInputStream(simulatedUserInput.getBytes());
+        Scanner scanner = new Scanner(in);
+
+        Authenticator authenticator = new Authenticator(utility.GetNewClient(), utility.GetOutStream(), scanner);
+        boolean result = authenticator.TryLogin(username);
+        assertFalse("Returned true for bad user pass combo", result);
+    }
 }

@@ -3,6 +3,7 @@ package org.yesworkflow.cli;
 import static java.util.Arrays.asList;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +68,8 @@ public class YesWorkflowCLI {
 
     private final YesWorkflowDB ywdb;
     private final PrintStream errStream;
-    private final PrintStream outStream;    
+    private final PrintStream outStream;
+    private final InputStream inputSource;
     public VersionInfo versionInfo;
     private OptionSet options = null;
     private Extractor extractor = null;
@@ -138,6 +140,7 @@ public class YesWorkflowCLI {
         this.ywdb = ywdb;
         this.outStream = outStream;
         this.errStream = errStream;
+        this.inputSource = System.in;
     }
       
     public YesWorkflowCLI config(YWConfiguration config) {
@@ -295,14 +298,12 @@ public class YesWorkflowCLI {
                     return ExitCode.SUCCESS;
 
                 case SAVE:
-                    if(config.get("recon.factsfile") == null)
-                        config.set("recon.factsfile", "");
-
+                    beforeRunSave();
                     extract();
                     model();
                     graph();
                     recon();
-                    save();
+                    afterRunSave();
                     return ExitCode.SUCCESS;
             }
             
@@ -465,9 +466,25 @@ public class YesWorkflowCLI {
                      .recon();
     }
 
-    private void save() throws Exception {
+    private void beforeRunSave() throws Exception
+    {
         if (saver == null) {
-            saver = new HttpSaver(new JsonSerializer());
+            saver = new HttpSaver(new JsonSerializer(), this.outStream, this.errStream, this.inputSource);
+        }
+
+        // A non null factsfile must be specified to gather recon facts.
+        if (config.get("recon.factsfile") == null) {
+            config.set("recon.factsfile", "");
+        }
+
+        saver.configure(config.getSection("save"))
+                .login();
+    }
+
+    private void afterRunSave() throws Exception
+    {
+        if (saver == null) {
+            saver = new HttpSaver(new JsonSerializer(), this.outStream, this.errStream, this.inputSource);
         }
 
         saver.configure(config.getSection("save"))
