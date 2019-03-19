@@ -216,7 +216,7 @@ public class TestYwClient
     {
         Authenticator authenticator = new Authenticator(client, null, null);
         boolean connection = authenticator.CheckConnection();
-        assertTrue("Authenticator did returned false on a valid connection", connection);
+        assertTrue("Authenticator returned false on a valid connection", connection);
     }
 
     @Test
