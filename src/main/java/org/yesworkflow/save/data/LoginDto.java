@@ -23,7 +23,6 @@ public class LoginDto
         this(username, null, password);
     }
 
-
     public LoginDto(Builder builder)
     {
         this.username = builder.username;

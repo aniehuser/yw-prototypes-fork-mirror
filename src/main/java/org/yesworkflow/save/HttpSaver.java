@@ -22,12 +22,12 @@ public class HttpSaver implements Saver
     private final String HASH_ALGOTRITHM = "SHA-256";
     private final int MAX_LOGIN_RETRIES = 2;
 
-    IYwSerializer ywSerializer;
-    Authenticator authenticator;
-    Hash hasher;
+    IYwSerializer ywSerializer = null;
+    Authenticator authenticator = null;
+    Hash hasher = null;
     PrintStream out = null;
     PrintStream errStream = null;
-    Scanner inStream;
+    Scanner inStream = null;
     IClient client = null;
     Integer workflowId = null;
     String baseUrl = "http://localhost:8000/";
@@ -38,15 +38,15 @@ public class HttpSaver implements Saver
 
     Run run = null;
     String modelChecksum = "";
-    List<String> tags;
-    List<ScriptDto> scripts;
-    List<DataDto> data;
-    List<ChannelDto> channels;
-    List<PortDto> ports;
-    List<ProgramBlockDto> programBlocks;
-    List<ResourceDto> resources;
-    List<UriVariableDto> uriVariables;
-    List<UriVariableValueDto> uriVariableValues;
+    List<String> tags = null;
+    List<ScriptDto> scripts = null;
+    List<DataDto> data = null;
+    List<ChannelDto> channels = null;
+    List<PortDto> ports = null;
+    List<ProgramBlockDto> programBlocks = null;
+    List<ResourceDto> resources = null;
+    List<UriVariableDto> uriVariables = null;
+    List<UriVariableValueDto> uriVariableValues = null;
 
     public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception
     {
@@ -155,9 +155,7 @@ public class HttpSaver implements Saver
             if(response.ResponseObject.newVersion)
                 message = message + newVersionMessage;
         }
-
         out.println(message);
-
         return this;
     }
 
