@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class HttpSaver implements Saver
 {
-    private final String HASH_ALGOTRITHM = "SHA-256";
+    private final String HASH_ALGORITHM = "SHA-256";
     private final int MAX_LOGIN_RETRIES = 2;
 
     IYwSerializer ywSerializer = null;
@@ -53,11 +53,11 @@ public class HttpSaver implements Saver
         if(inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
         try
         {
-            hasher = new Hash(HASH_ALGOTRITHM);
+            hasher = new Hash(HASH_ALGORITHM);
         }
         catch (NoSuchAlgorithmException e)
         { // this case should never occur
-            throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGOTRITHM);
+            throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGORITHM);
         }
         this.out = out;
         this.errStream = errStream;

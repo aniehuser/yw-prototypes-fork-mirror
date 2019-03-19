@@ -18,8 +18,7 @@ public class Authenticator
     private Scanner inStream;
     private Console console;
     private boolean loggedIn;
-
-
+    
     public Authenticator(IClient client, PrintStream outStream, Scanner inStream)
     {
         this.client = client;
