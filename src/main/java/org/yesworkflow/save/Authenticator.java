@@ -85,7 +85,7 @@ public class Authenticator
 
         // console class masks user input, but does not typically work on IDE's
         if(console != null)
-            return console.readPassword().toString();
+            return String.valueOf(console.readPassword());
         return inStream.nextLine();
     }
 
