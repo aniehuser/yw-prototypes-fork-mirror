@@ -88,8 +88,7 @@ public class YwClient implements IClient {
         Response response;
         try
         {
-            String s = serializer.Serialize(Dto);
-            StringEntity json = new StringEntity(s);
+            StringEntity json = new StringEntity(serializer.Serialize(Dto));
             json.setContentType("application/json");
             postRequest.setEntity(json);
             if(token != null)
