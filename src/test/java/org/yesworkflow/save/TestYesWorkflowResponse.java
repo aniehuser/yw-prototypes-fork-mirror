@@ -18,6 +18,8 @@ import org.yesworkflow.save.response.LoginResponse;
 import org.yesworkflow.save.response.LogoutResponse;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
+import org.yesworkflow.save.serialization.IYwSerializer;
+import org.yesworkflow.save.serialization.JsonSerializer;
 
 import java.io.IOException;
 import java.io.InputStream;

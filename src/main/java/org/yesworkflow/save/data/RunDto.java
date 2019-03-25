@@ -6,8 +6,6 @@ import java.util.List;
 
 public class RunDto {
 
-    @SerializedName("username")
-    public String username;
     @SerializedName("title")
     public String title;
     @SerializedName("description")
@@ -22,8 +20,6 @@ public class RunDto {
     public List<String> tags;
     @SerializedName("scripts")
     public List<ScriptDto> scripts;
-    @SerializedName("files")
-    public List<FileDto> files;
     @SerializedName("programBlock")
     public List<ProgramBlockDto> programBlocks;
     @SerializedName("data")
@@ -39,15 +35,13 @@ public class RunDto {
     @SerializedName("uriVariableValue")
     public List<UriVariableValueDto> uriVariableValues;
 
-    public RunDto(String username,
-                  String title,
+    public RunDto(String title,
                   String description,
                   String model,
                   String modelChecksum,
                   String graph,
                   List<String> tags,
                   List<ScriptDto> scripts,
-                  List<FileDto> files,
                   List<ProgramBlockDto> programBlocks,
                   List<DataDto> data,
                   List<PortDto> ports,
@@ -56,7 +50,6 @@ public class RunDto {
                   List<ResourceDto> resources,
                   List<UriVariableValueDto> uriVariableValues)
     {
-        this.username = username;
         this.title = title;
         this.description = description;
         this.model = model;
@@ -64,7 +57,6 @@ public class RunDto {
         this.graph = graph;
         this.tags = tags;
         this.scripts = scripts;
-        this.files = files;
         this.programBlocks = programBlocks;
         this.data = data;
         this.ports = ports;
@@ -76,7 +68,6 @@ public class RunDto {
 
     public static class Builder
     {
-        public String username;
         public String title;
         public String description;
         public String model;
@@ -84,7 +75,6 @@ public class RunDto {
         public String graph;
         public List<String> tags;
         public List<ScriptDto> scripts;
-        public List<FileDto> files;
         public List<ProgramBlockDto> programBlocks;
         public List<DataDto> data;
         public List<PortDto> ports;
@@ -93,9 +83,8 @@ public class RunDto {
         public List<ResourceDto> resources;
         public List<UriVariableValueDto> uriVariableValues;
 
-        public Builder(String username, String model, String modelChecksum, String graph, List<ScriptDto> scripts)
+        public Builder(String model, String modelChecksum, String graph, List<ScriptDto> scripts)
         {
-            this.username = username;
             this.model = model;
             this.modelChecksum = modelChecksum;
             this.graph = graph;
@@ -117,12 +106,6 @@ public class RunDto {
         public Builder setTags(List<String> tags)
         {
             this.tags = tags;
-            return this;
-        }
-
-        public Builder setFiles(List<FileDto> files)
-        {
-            this.files = files;
             return this;
         }
 
@@ -176,7 +159,6 @@ public class RunDto {
 
     public RunDto(Builder builder)
     {
-        this.username=builder.username;
         this.title=builder.title;
         this.description=builder.description;
         this.model=builder.model;
@@ -184,7 +166,6 @@ public class RunDto {
         this.graph=builder.graph;
         this.tags=builder.tags;
         this.scripts=builder.scripts;
-        this.files=builder.files;
         this.programBlocks=builder.programBlocks;
         this.data=builder.data;
         this.ports=builder.ports;

@@ -2,14 +2,19 @@ package org.yesworkflow.save;
 
 import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.model.*;
+import org.yesworkflow.recon.Resource;
 import org.yesworkflow.recon.Run;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
+import org.yesworkflow.save.serialization.IYwSerializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -112,11 +117,14 @@ public class HttpSaver implements Saver
         modelChecksum = scripts.get(0).checksum;
 
         flattenModel(run.model);
-        resources = mapCustomObjectList(run.resources, ResourceDto::new);
+
+        for(Resource resource : run.resources)
+            resources.add(collectFileMetadata(resource));
+
         uriVariables = mapCustomObjectList(run.uriVariables, UriVariableDto::new);
         uriVariableValues = mapCustomObjectList(run.uriVariableValues, UriVariableValueDto::new);
 
-        RunDto.Builder builder = new RunDto.Builder(username, "modelV", modelChecksum, graph, scripts)
+        RunDto.Builder builder = new RunDto.Builder("modelV", modelChecksum, graph, scripts)
                                             .setChannels(channels)
                                             .setData(data)
                                             .setPorts(ports)
@@ -262,6 +270,21 @@ public class HttpSaver implements Saver
             dtoList.add(builder.build());
         }
         return dtoList;
+    }
+
+    private ResourceDto collectFileMetadata(Resource resource) throws Exception
+    {
+        File file = new File(resource.uri);
+        long epochSeconds = file.lastModified() / 1000;
+        LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(epochSeconds, 0, ZoneOffset.UTC);
+        String checksum = hasher.getHash(resource.uri);
+        return new ResourceDto.Builder(resource)
+                            .setName(file.getName())
+                            .setSize(file.length())
+                            .setLastModified(localDateTime)
+                            .setChecksum(checksum)
+                            .build();
+
     }
 
     private <CustomObj, Obj> List<CustomObj> mapCustomObjectList(List<Obj> objectList, Function<Obj, CustomObj> customMapper)
