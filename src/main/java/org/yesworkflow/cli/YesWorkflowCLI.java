@@ -25,7 +25,7 @@ import org.yesworkflow.model.Modeler;
 import org.yesworkflow.recon.DefaultReconstructor;
 import org.yesworkflow.recon.Reconstructor;
 import org.yesworkflow.recon.Run;
-import org.yesworkflow.save.JsonSerializer;
+import org.yesworkflow.save.serialization.JsonSerializer;
 import org.yesworkflow.save.Saver;
 import org.yesworkflow.save.HttpSaver;
 

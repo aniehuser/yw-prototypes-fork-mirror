@@ -1,10 +1,11 @@
-package org.yesworkflow.save;
+package org.yesworkflow.save.serialization;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 public class JsonSerializer implements IYwSerializer
 {
@@ -12,12 +13,10 @@ public class JsonSerializer implements IYwSerializer
     private Gson gson;
     public JsonSerializer()
     {
-        gson = new Gson();
-    }
-
-    public InputStream SerializeToInputStream(Object object)
-    {
-        return org.apache.commons.io.IOUtils.toInputStream(Serialize(object), StandardCharsets.UTF_8);
+        GsonIso8601LocalDateTimeAdapter localDateTimeAdapter = new GsonIso8601LocalDateTimeAdapter();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, localDateTimeAdapter)
+                .create();
     }
 
     public String Serialize(Object object)
