@@ -22,7 +22,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
-public class HttpSaver implements Saver {
+public class HttpSaver implements Saver
+{
     private final String HASH_ALGORITHM = "SHA-256";
     private final int MAX_LOGIN_RETRIES = 2;
 
@@ -53,11 +54,12 @@ public class HttpSaver implements Saver {
 
     public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception
     {
-        if (inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
+        if(inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
         try
         {
             hasher = new Hash(HASH_ALGORITHM);
-        } catch (NoSuchAlgorithmException e)
+        }
+        catch(NoSuchAlgorithmException e)
         { // this case should never occur
             throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGORITHM);
         }
@@ -99,7 +101,8 @@ public class HttpSaver implements Saver {
             authenticator.PrintPasswordForUsername(username);
 
         int attempts = 0;
-        while(canRetry(attempts) && !authenticator.TryLogin(username)) {
+        while(canRetry(attempts) && !authenticator.TryLogin(username))
+        {
             authenticator.PrintRetryMessage();
             attempts += 1;
         }
@@ -142,14 +145,17 @@ public class HttpSaver implements Saver {
         RunDto run = builder.build();
 
         String message = "Succesfully uploaded this run to %s.\nWorkflow ID: %d\nVersion: %d\nRun Number: %d";
-        if(workflowId == null) {
+        if(workflowId == null)
+        {
             SaveResponse response = client.SaveRun(run);
             message = String.format(message,
                                     baseUrl,
                                     response.ResponseObject.workflowId,
                                     response.ResponseObject.versionNumber,
                                     response.ResponseObject.runNumber);
-        } else {
+        }
+        else
+        {
             UpdateResponse response = client.UpdateWorkflow(workflowId, run);
             String newVersionMessage = "\nChanges to the workflow script created a new version of your workflow on the server.";
             message = String.format(message,
