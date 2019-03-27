@@ -28,7 +28,6 @@ public class HttpSaver implements Saver
     private final int MAX_LOGIN_RETRIES = 2;
 
     IYwSerializer ywSerializer = null;
-    Authenticator authenticator = null;
     Hash hasher = null;
     PrintStream out = null;
     PrintStream errStream = null;
@@ -60,7 +59,7 @@ public class HttpSaver implements Saver
         {
             hasher = new Hash(HASH_ALGORITHM);
         }
-        catch (NoSuchAlgorithmException e)
+        catch(NoSuchAlgorithmException e)
         { // this case should never occur
             throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGORITHM);
         }
@@ -69,7 +68,6 @@ public class HttpSaver implements Saver
         this.inStream = new Scanner(inSource);
         this.ywSerializer = ywSerializer;
         this.client = new YwClient(baseUrl, ywSerializer);
-        this.authenticator = new Authenticator(client, out, inStream);
         tags = new ArrayList<>();
         scripts = new ArrayList<>();
         data = new ArrayList<>();
@@ -86,12 +84,16 @@ public class HttpSaver implements Saver
         this.run = run;
         this.graph = graph;
         this.scripts = hashAndMapSourcePaths(sourcePaths, sourceCodeList);
+
         return this;
     }
 
     public Saver login() throws Exception
     {
-        if(!authenticator.CheckConnection())
+        client.UpdateBaseUrl(baseUrl);
+        Authenticator authenticator = new Authenticator(client, out, inStream);
+
+        if (!authenticator.CheckConnection())
             throw new YwSaveException("Failed to connect to " + baseUrl);
 
         authenticator.PrintAuthMessage(baseUrl);
@@ -143,7 +145,8 @@ public class HttpSaver implements Saver
         RunDto run = builder.build();
 
         String message = "Succesfully uploaded this run to %s.\nWorkflow ID: %d\nVersion: %d\nRun Number: %d";
-        if(workflowId == null) {
+        if(workflowId == null)
+        {
             SaveResponse response = client.SaveRun(run);
             message = String.format(message,
                                     baseUrl,
@@ -151,7 +154,8 @@ public class HttpSaver implements Saver
                                     response.ResponseObject.versionNumber,
                                     response.ResponseObject.runNumber);
         }
-        else {
+        else
+        {
             UpdateResponse response = client.UpdateWorkflow(workflowId, run);
             String newVersionMessage = "\nChanges to the workflow script created a new version of your workflow on the server.";
             message = String.format(message,
@@ -171,7 +175,7 @@ public class HttpSaver implements Saver
     {
         List<ScriptDto> scriptDtoList = new ArrayList<>();
 
-        for (int i = 0; i < sourceCodeList.size(); i++)
+        for(int i = 0; i < sourceCodeList.size(); i++)
         {
             try
             {

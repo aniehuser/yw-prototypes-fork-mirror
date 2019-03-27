@@ -31,6 +31,11 @@ public class YwClient implements IClient {
         this.serializer = serializer;
     }
 
+    public void UpdateBaseUrl(String baseUrl)
+    {
+        this.baseUrl = baseUrl;
+    }
+
     public PingResponse Ping()
             throws YwSaveException
     {
