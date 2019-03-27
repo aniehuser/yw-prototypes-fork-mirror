@@ -4,6 +4,8 @@ import org.junit.*;
 import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.*;
+import org.yesworkflow.save.serialization.IYwSerializer;
+import org.yesworkflow.save.serialization.JsonSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -76,7 +78,7 @@ public class TestYwClient
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
         scripts.add(scriptDto);
-        RunDto run = new RunDto.Builder(username, "model", "check", "graph", scripts)
+        RunDto run = new RunDto.Builder("model", "check", "graph", scripts)
                                 .build();
         SaveResponse response = client.SaveRun(run);
         assertTrue(response.ResponseBody, response.OK);
@@ -124,7 +126,7 @@ public class TestYwClient
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
         scripts.add(scriptDto);
-        RunDto run = new RunDto.Builder(username, "model", "check", "graph", scripts)
+        RunDto run = new RunDto.Builder("model", "check", "graph", scripts)
                 .build();
 
         SaveResponse saveResponse = client.SaveRun(run);
@@ -152,7 +154,7 @@ public class TestYwClient
         ScriptDto scriptDto = new ScriptDto("name", "content", "checksum");
         ArrayList<ScriptDto> scripts = new ArrayList<>();
         scripts.add(scriptDto);
-        RunDto run = new RunDto.Builder(username, "model", "check", "graph", scripts)
+        RunDto run = new RunDto.Builder("model", "check", "graph", scripts)
                 .build();
 
         client.SaveRun(run);

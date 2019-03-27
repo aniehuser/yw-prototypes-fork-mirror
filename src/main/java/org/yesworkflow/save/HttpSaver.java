@@ -2,14 +2,19 @@ package org.yesworkflow.save;
 
 import org.yesworkflow.exceptions.YwSaveException;
 import org.yesworkflow.model.*;
+import org.yesworkflow.recon.Resource;
 import org.yesworkflow.recon.Run;
 import org.yesworkflow.save.data.*;
 import org.yesworkflow.save.response.SaveResponse;
 import org.yesworkflow.save.response.UpdateResponse;
+import org.yesworkflow.save.serialization.IYwSerializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -17,8 +22,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
-public class HttpSaver implements Saver
-{
+public class HttpSaver implements Saver {
     private final String HASH_ALGORITHM = "SHA-256";
     private final int MAX_LOGIN_RETRIES = 2;
 
@@ -48,15 +52,11 @@ public class HttpSaver implements Saver
     List<UriVariableDto> uriVariables = null;
     List<UriVariableValueDto> uriVariableValues = null;
 
-    public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception
-    {
-        if(inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
-        try
-        {
+    public HttpSaver(IYwSerializer ywSerializer, PrintStream out, PrintStream errStream, InputStream inSource) throws Exception {
+        if (inSource == null) throw new IllegalArgumentException("Cannot have null 'inSource' for HttpSaver");
+        try {
             hasher = new Hash(HASH_ALGORITHM);
-        }
-        catch (NoSuchAlgorithmException e)
-        { // this case should never occur
+        } catch (NoSuchAlgorithmException e) { // this case should never occur
             throw new YwSaveException("Invalid internal hashing algorithm " + HASH_ALGORITHM);
         }
         this.out = out;
@@ -64,7 +64,6 @@ public class HttpSaver implements Saver
         this.inStream = new Scanner(inSource);
         this.ywSerializer = ywSerializer;
         this.client = new YwClient(baseUrl, ywSerializer);
-        this.authenticator = new Authenticator(client, out, inStream);
         tags = new ArrayList<>();
         scripts = new ArrayList<>();
         data = new ArrayList<>();
@@ -76,83 +75,85 @@ public class HttpSaver implements Saver
         uriVariableValues = new ArrayList<>();
     }
 
-    public Saver build(Run run, String graph, List<String> sourceCodeList, List<String> sourcePaths)
-    {
+    public Saver build(Run run, String graph, List<String> sourceCodeList, List<String> sourcePaths) {
         this.run = run;
         this.graph = graph;
         this.scripts = hashAndMapSourcePaths(sourcePaths, sourceCodeList);
+
         return this;
     }
 
-    public Saver login() throws Exception
-    {
-        if(!authenticator.CheckConnection())
+    public Saver login() throws Exception {
+        client.UpdateBaseUrl(baseUrl);
+        Authenticator authenticator = new Authenticator(client, out, inStream);
+
+        if (!authenticator.CheckConnection())
             throw new YwSaveException("Failed to connect to " + baseUrl);
 
         authenticator.PrintAuthMessage(baseUrl);
-        if(username != null)
+        if (username != null)
             authenticator.PrintPasswordForUsername(username);
 
         int attempts = 0;
-        while(canRetry(attempts) && !authenticator.TryLogin(username))
-        {
+        while (canRetry(attempts) && !authenticator.TryLogin(username)) {
             authenticator.PrintRetryMessage();
             attempts += 1;
         }
 
-        if(!authenticator.IsLoggedIn())
+        if (!authenticator.IsLoggedIn())
             throw new YwSaveException("Too many incorrect username password combinations.");
 
         return this;
     }
 
-    public Saver save() throws Exception
-    {
+    public Saver save() throws Exception {
         // TODO:: make model string representation and take checksum.
         modelChecksum = scripts.get(0).checksum;
 
         flattenModel(run.model);
-        resources = mapCustomObjectList(run.resources, ResourceDto::new);
+
+        for (Resource resource : run.resources)
+            resources.add(collectFileMetadata(resource));
+
         uriVariables = mapCustomObjectList(run.uriVariables, UriVariableDto::new);
         uriVariableValues = mapCustomObjectList(run.uriVariableValues, UriVariableValueDto::new);
 
-        RunDto.Builder builder = new RunDto.Builder(username, "modelV", modelChecksum, graph, scripts)
-                                            .setChannels(channels)
-                                            .setData(data)
-                                            .setPorts(ports)
-                                            .setProgramBlocks(programBlocks)
-                                            .setResources(resources)
-                                            .setUriVariables(uriVariables)
-                                            .setUriVariableValues(uriVariableValues);
+        RunDto.Builder builder = new RunDto.Builder("modelV", modelChecksum, graph, scripts)
+                .setChannels(channels)
+                .setData(data)
+                .setPorts(ports)
+                .setProgramBlocks(programBlocks)
+                .setResources(resources)
+                .setUriVariables(uriVariables)
+                .setUriVariableValues(uriVariableValues);
 
-        if(title != null)
+        if (title != null)
             builder.setTitle(title);
-        if(description != null)
+        if (description != null)
             builder.setDescription(description);
-        if(!tags.isEmpty())
+        if (!tags.isEmpty())
             builder.setTags(tags);
 
         RunDto run = builder.build();
 
         String message = "Succesfully uploaded this run to %s.\nWorkflow ID: %d\nVersion: %d\nRun Number: %d";
-        if(workflowId == null) {
+        if (workflowId == null) {
             SaveResponse response = client.SaveRun(run);
             message = String.format(message,
-                                    baseUrl,
-                                    response.ResponseObject.workflowId,
-                                    response.ResponseObject.versionNumber,
-                                    response.ResponseObject.runNumber);
-        }
-        else {
+                    baseUrl,
+                    response.ResponseObject.workflowId,
+                    response.ResponseObject.versionNumber,
+                    response.ResponseObject.runNumber);
+        } else {
             UpdateResponse response = client.UpdateWorkflow(workflowId, run);
             String newVersionMessage = "\nChanges to the workflow script created a new version of your workflow on the server.";
             message = String.format(message,
-                                    baseUrl,
-                                    response.ResponseObject.workflowId,
-                                    response.ResponseObject.versionNumber,
-                                    response.ResponseObject.runNumber);
+                    baseUrl,
+                    response.ResponseObject.workflowId,
+                    response.ResponseObject.versionNumber,
+                    response.ResponseObject.runNumber);
 
-            if(response.ResponseObject.newVersion)
+            if (response.ResponseObject.newVersion)
                 message = message + newVersionMessage;
         }
         out.println(message);
@@ -262,6 +263,21 @@ public class HttpSaver implements Saver
             dtoList.add(builder.build());
         }
         return dtoList;
+    }
+
+    private ResourceDto collectFileMetadata(Resource resource) throws Exception
+    {
+        File file = new File(resource.uri);
+        long epochSeconds = file.lastModified() / 1000;
+        LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(epochSeconds, 0, ZoneOffset.UTC);
+        String checksum = hasher.getHash(resource.uri);
+        return new ResourceDto.Builder(resource)
+                            .setName(file.getName())
+                            .setSize(file.length())
+                            .setLastModified(localDateTime)
+                            .setChecksum(checksum)
+                            .build();
+
     }
 
     private <CustomObj, Obj> List<CustomObj> mapCustomObjectList(List<Obj> objectList, Function<Obj, CustomObj> customMapper)

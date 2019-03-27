@@ -15,5 +15,6 @@ public interface IClient {
     LogoutResponse Logout() throws YwSaveException;
     SaveResponse SaveRun(RunDto runDto) throws YwSaveException;
     UpdateResponse UpdateWorkflow(Integer workflowId, RunDto runDto) throws YwSaveException;
+    void UpdateBaseUrl(String baseurl);
     IClient Close() throws YwSaveException;
 }

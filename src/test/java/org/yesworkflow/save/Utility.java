@@ -6,6 +6,8 @@ import org.yesworkflow.save.data.LoginDto;
 import org.yesworkflow.save.data.RegisterDto;
 import org.yesworkflow.save.data.TestData;
 import org.yesworkflow.save.response.RegisterResponse;
+import org.yesworkflow.save.serialization.IYwSerializer;
+import org.yesworkflow.save.serialization.JsonSerializer;
 
 import java.io.PrintStream;
 import java.util.HashMap;
