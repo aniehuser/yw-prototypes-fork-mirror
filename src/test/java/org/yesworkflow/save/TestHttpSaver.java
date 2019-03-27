@@ -66,4 +66,29 @@ public class TestHttpSaver extends YesWorkflowTestCase
         saver.configure("workflow", "1");
         Assert.assertEquals(expected, saver.workflowId);
     }
+    
+    @Test
+    public void testSaver_FormatUrl() throws Exception
+    {
+        IYwSerializer serializer = new JsonSerializer();
+        HttpSaver saver = new HttpSaver(serializer, null, null, mock(InputStream.class));
+
+        String[][] testData = new String[][]{
+                {"url", "http://url/"},
+                {"url/", "http://url/"},
+                {"http://url", "http://url/"},
+                {"http://url/", "http://url/"},
+                {"https://url", "https://url/"},
+                {"https://url/", "https://url/"},
+                {"", "http://"},
+        };
+
+        for(String[] dataPoint : testData)
+        {
+            saver.configure("serveraddress", dataPoint[0]);
+            assertEquals(String.format("Saver transformed '%s' to  '%s'", dataPoint[0], saver.baseUrl),
+                    dataPoint[1],
+                    saver.baseUrl);
+        }
+    }
 }
