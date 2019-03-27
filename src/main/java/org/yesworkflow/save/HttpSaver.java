@@ -27,7 +27,6 @@ public class HttpSaver implements Saver {
     private final int MAX_LOGIN_RETRIES = 2;
 
     IYwSerializer ywSerializer = null;
-    Authenticator authenticator = null;
     Hash hasher = null;
     PrintStream out = null;
     PrintStream errStream = null;
@@ -112,20 +111,20 @@ public class HttpSaver implements Saver {
 
         flattenModel(run.model);
 
-        for (Resource resource : run.resources)
+        for(Resource resource : run.resources)
             resources.add(collectFileMetadata(resource));
 
         uriVariables = mapCustomObjectList(run.uriVariables, UriVariableDto::new);
         uriVariableValues = mapCustomObjectList(run.uriVariableValues, UriVariableValueDto::new);
 
         RunDto.Builder builder = new RunDto.Builder("modelV", modelChecksum, graph, scripts)
-                .setChannels(channels)
-                .setData(data)
-                .setPorts(ports)
-                .setProgramBlocks(programBlocks)
-                .setResources(resources)
-                .setUriVariables(uriVariables)
-                .setUriVariableValues(uriVariableValues);
+                                            .setChannels(channels)
+                                            .setData(data)
+                                            .setPorts(ports)
+                                            .setProgramBlocks(programBlocks)
+                                            .setResources(resources)
+                                            .setUriVariables(uriVariables)
+                                            .setUriVariableValues(uriVariableValues);
 
         if (title != null)
             builder.setTitle(title);
