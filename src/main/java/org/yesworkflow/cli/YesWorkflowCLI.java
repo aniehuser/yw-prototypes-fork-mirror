@@ -303,7 +303,7 @@ public class YesWorkflowCLI {
                     model();
                     graph();
                     recon();
-                    afterRunSave();
+                    save();
                     return ExitCode.SUCCESS;
             }
             
@@ -384,8 +384,8 @@ public class YesWorkflowCLI {
         "save.serveraddress         Specify the webcomponents server to save runs to."                  + EOL +
         "save.username              Your username on the webcomponents server."                         + EOL +
         "save.workflow              The workflow id of a workflow to add a run to."                     + EOL +
-        "save.title                 Set the title of your workflow."                                    + EOL +
-        "save.description           Set the description of your workflow."                              + EOL + 
+        "save.title                 Set the title of your workflow on the webcomponents server"         + EOL +
+        "save.description           Set the description of your workflow on the webcomponents server."  + EOL +
         "save.tags                  Add tags to your workflow."                                         + EOL;
     
     public static final String YW_CLI_EXAMPLES_HELP = 
@@ -468,20 +468,13 @@ public class YesWorkflowCLI {
 
     private void beforeRunSave() throws Exception
     {
-        if (saver == null) {
-            saver = new HttpSaver(new JsonSerializer(), this.outStream, this.errStream, this.inputSource);
-        }
-
         // A non null factsfile must be specified to gather recon facts.
         if (config.get("recon.factsfile") == null) {
             config.set("recon.factsfile", "");
         }
-
-        saver.configure(config.getSection("save"))
-                .login();
     }
 
-    private void afterRunSave() throws Exception
+    private void save() throws Exception
     {
         if (saver == null) {
             saver = new HttpSaver(new JsonSerializer(), this.outStream, this.errStream, this.inputSource);
@@ -489,6 +482,7 @@ public class YesWorkflowCLI {
 
         saver.configure(config.getSection("save"))
                 .build(run, grapher.toString(), extractor.getSourceCodeList(), extractor.getSourcePaths())
+                .login()
                 .save();
     }
 }
