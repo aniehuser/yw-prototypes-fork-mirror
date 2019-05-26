@@ -1,7 +1,7 @@
 language: java
 install:
   - source ~/virtualenv/python3.6/bin/activate
-  - git clone --progress --verbose https://github.com/aniehuser/senior-design-group10.git
+  - git clone --progress --verbose https://github.com/aniehuser/senior-design-mirror.git
   - cd senior-design-group10/scripts
   - ./deploy_python3.sh &
 ##### TODO:: edit this time after signin/signup route
